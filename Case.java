@@ -17,7 +17,7 @@ public class Case extends Rectangle{
 	protected boolean hybride;
 								//NB : False par defaut dans le premier constructeur
 	public Case next;
-	public Case next2;
+	//public Case next2;		//Second pointeur test
 	
 	public Case(int posx, int posy){
 		super(posx, posy, LCASE, LCASE);
@@ -26,7 +26,7 @@ public class Case extends Rectangle{
 		bordure = false;
 		hybride = false;
 		next = null;
-		next2 = null;
+		//next2 = null;
 	}
 	
 	public Case(int posx, int posy, boolean isCh, boolean isOccup){
@@ -36,7 +36,7 @@ public class Case extends Rectangle{
 		bordure = false;
 		hybride = false;
 		next = null;
-		next2 = null;
+		//next2 = null;
 	}
 		
 	public void drawCase(Graphics g){

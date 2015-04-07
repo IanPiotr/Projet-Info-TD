@@ -25,7 +25,6 @@ public class Fenetre extends JFrame{
 
 	private Rectangle ecran;
     private BufferedImage monBuf;
-    private BufferedImage actuBuf;
     private Timer timer;
     private Timer actu;
     private Tour1 eiffel;
@@ -51,7 +50,6 @@ public class Fenetre extends JFrame{
         /* INIT BUFFER */
         Dimension dim = getSize();
         monBuf = new BufferedImage(dim.width-300,dim.height,BufferedImage.TYPE_INT_RGB); //-300 car le menu fait 300 de large
-		actuBuf = new BufferedImage(300,740, BufferedImage.TYPE_INT_RGB);
 		
 		/* INIT JOUEUR */
         bizuth = new Joueur("Bizuth1");
@@ -83,102 +81,91 @@ public class Fenetre extends JFrame{
         menuTest = new Menu(bizuth, this);
 		getContentPane().add(menuTest);
 		
+		
        
         /* INIT QUADRILAGE DE LA CARTE
          * Uniquement sur la zone jouable
          * Chemin predefini pour le moment
          */
         tabCases = new Case[(getWidth()-300)/Case.LCASE][getHeight()/Case.LCASE];
-        
         for(int i=0; i<tabCases.length; i++){
 			for(int j=0; j<tabCases[0].length;j++){
 				tabCases[i][j]= new Case(i*Case.LCASE, j*Case.LCASE);
 			}
 		}
-		
 		for(int i=10; i<14; i++){
 			for(int j=0; j<10; j++){
 				tabCases[i][j].setChemin(true);
 			}
 		}
-        
         for(int i=10; i<20; i++){
 			for(int j=10; j<14; j++){
 				tabCases[i][j].setChemin(true);
 			}
 		}
-		
 		for(int i=16; i<20; i++){
 			for(int j=14; j<24; j++){
 				tabCases[i][j].setChemin(true);
 			}
 		}
 		
-			/*
-			 * Implantation bordures chemin
-			 * Une case ne doit pas appartenir a deux listes, sinon conflit
-			 * Donc utilisation de deux pointeurs differents
-			 * et insertion de clones et non de la case originel si elle est deja dans une autre liste
-			 * (double precaution pour le moment)
-			 */
+		/* INIT BORDURES CHEMIN
+		 * Une case ne doit pas appartenir a deux listes, sinon conflit (pointeurs)
+		 * Donc insertion de clones et non de la case originel si elle est deja dans une autre liste
+		 */
 		bordureGauche = new ListeCases();
 		bordureDroite = new ListeCases();
 		bordureBas = new ListeCases();
 		bordureHaut = new ListeCases();
-		
 		for(int i=0; i<tabCases.length-1; i++){
 			for(int j=0; j<tabCases[0].length-1; j++){
-				if(tabCases[i][j].chemin == false && tabCases[i+1][j].chemin == true){
-					if(tabCases[i][j].bordure == false){
+				if(!tabCases[i][j].chemin && tabCases[i+1][j].chemin){
+					if(!tabCases[i][j].bordure){
 						bordureGauche.insertTete(tabCases[i][j]);
 						tabCases[i][j].bordure = true;
 					} else {
 						Case nc = (Case)tabCases[i][j].clone();
-						nc.bordure = false;
 						tabCases[i][j].hybride = true;
 						nc.hybride = true;
 						bordureGauche.insertTete(nc);
 					}
-				} else if(tabCases[i][j].chemin == true && tabCases[i+1][j].chemin == false){
-					if(tabCases[i+1][j].bordure == false){
+				} else if(tabCases[i][j].chemin && !tabCases[i+1][j].chemin){
+					if(!tabCases[i+1][j].bordure){
 						bordureDroite.insertTete(tabCases[i+1][j]);
 						tabCases[i+1][j].bordure = true;
 					} else {
 						Case nc = (Case)tabCases[i+1][j].clone();
-						nc.bordure = true;
 						tabCases[i+1][j].hybride = true;
 						nc.hybride = true;
 						bordureDroite.insertTete(nc);
 					}
-				} else if(tabCases[i][j].chemin == true && tabCases[i][j+1].chemin == false){
-					if(tabCases[i][j+1].bordure == false){
-						bordureBas.insertTete2(tabCases[i][j+1]);
+				} else if(tabCases[i][j].chemin && !tabCases[i][j+1].chemin){
+					if(!tabCases[i][j+1].bordure){
+						bordureBas.insertTete(tabCases[i][j+1]);
 						tabCases[i][j+1].bordure = true;
 					} else {
 						Case nc = (Case)tabCases[i][j+1].clone();
-						nc.bordure = false;
 						tabCases[i][j+1].hybride = true;
 						nc.hybride = true;
-						bordureBas.insertTete2(nc);
+						bordureBas.insertTete(nc);
 					}
-				} else if(tabCases[i][j].chemin == false && tabCases[i][j+1].chemin == true){
-					if(tabCases[i][j].bordure == false){
-						bordureHaut.insertTete2(tabCases[i][j]);
+				} else if(!tabCases[i][j].chemin && tabCases[i][j+1].chemin){
+					if(!tabCases[i][j].bordure){
+						bordureHaut.insertTete(tabCases[i][j]);
 						tabCases[i][j].bordure = true;
 					} else {
 						Case nc = (Case)tabCases[i][j].clone();
-						nc.bordure = false;
 						tabCases[i][j].hybride = true;
 						nc.hybride = true;
-						bordureHaut.insertTete2(nc);
+						bordureHaut.insertTete(nc);
 					}
 				}
 			}
 		}
 		//Cas particulier de la derniere ligne
 		for(int i=0; i<tabCases.length-1; i++){
-			if(tabCases[i][tabCases[0].length -1].chemin == false && tabCases[i+1][tabCases[0].length -1].chemin == true){
-				if(tabCases[i][tabCases[0].length -1].bordure == false){
+			if(!tabCases[i][tabCases[0].length -1].chemin && tabCases[i+1][tabCases[0].length -1].chemin){
+				if(!tabCases[i][tabCases[0].length -1].bordure){
 					bordureGauche.insertTete(tabCases[i][tabCases[0].length -1]);
 					tabCases[i][tabCases[0].length -1].bordure = true;
 				} else {
@@ -188,8 +175,8 @@ public class Fenetre extends JFrame{
 					nc.hybride = true;
 					bordureGauche.insertTete(nc);
 				}
-			} else if(tabCases[i][tabCases[0].length -1].chemin == true && tabCases[i+1][tabCases[0].length -1].chemin == false){
-				if(tabCases[i+1][tabCases[0].length -1].bordure == false){
+			} else if(tabCases[i][tabCases[0].length -1].chemin && !tabCases[i+1][tabCases[0].length -1].chemin){
+				if(!tabCases[i+1][tabCases[0].length -1].bordure){
 					bordureDroite.insertTete(tabCases[i+1][tabCases[0].length -1]);
 					tabCases[i+1][tabCases[0].length -1].bordure = true;
 				} else {
@@ -201,7 +188,6 @@ public class Fenetre extends JFrame{
 				}
 			}
 		}
-		//*//
         
         /* INIT TIMER */
         timer = new Timer(10, new letsDance());
@@ -216,7 +202,6 @@ public class Fenetre extends JFrame{
 	
 	public void paint(Graphics g) {
 		Graphics gb = monBuf.getGraphics();
-		Graphics gb2 = actuBuf.getGraphics();
 		/* PEINTURE FOND */
 		for(int i=0; i<tabCases.length; i++){
 			for(int j=0; j<tabCases[0].length;j++){
@@ -231,41 +216,14 @@ public class Fenetre extends JFrame{
 				tabCases[i][j].drawCase(gb);
 			}
 		}
-			// Visualisation Bordures
-		gb.setColor(Color.green);
-		Case curc = bordureBas.root;
-		while(curc != null){
-			curc.drawCase(gb);
-			curc = curc.next2;
-		}
-		gb.setColor(Color.pink);
-		curc = bordureHaut.root;
-		while(curc != null){
-			curc.drawCase(gb);
-			curc = curc.next2;
-		}
-		gb.setColor(Color.orange);
-		curc = bordureGauche.root;
-		while(curc != null){
-			curc.drawCase(gb);
-			curc = curc.next;
-		}
-		gb.setColor(Color.red);
-		curc = bordureDroite.root;
-		while(curc != null){
-			curc.drawCase(gb);
-			curc = curc.next;
-		}
-			//
-		
 		/* PEINTURE TESTS
+		 * Visualisation bordures chemin
 		 * Visualisation zones de contact
+		 * Visualisation portee tours
 		 */
-        gb.setColor(Color.red);
-		gb.fillRect(bob.getPosx(),bob.getPosy(),bob.cadre.width,bob.cadre.height);
-        gb.setColor(Color.blue);
-        gb.fillArc(bob.getPosx(), bob.getPosy(), bob.cadre.width, bob.cadre.height, 0, 360);
-		gb.fillArc(eiffel.getPosx()-(int)eiffel.portee.getWidth()/2 + eiffel.cadre.width/2, eiffel.getPosy()-(int)eiffel.portee.getHeight()/2+ eiffel.cadre.height/2, (int)eiffel.portee.getWidth(), (int)eiffel.portee.getHeight(), 0, 360);
+		//showBordures(gb);
+        showContoursEnnemi(gb, bob);
+		showPorteeTour(gb, eiffel);
 		/* PEINTURE ENNEMIS */
 		gb.setColor(Color.white);
 		Ennemis cur = listeEnnemis.root;
@@ -294,12 +252,12 @@ public class Fenetre extends JFrame{
 	
 	public class actuFuckingMenu implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			menuTest.repaint();
+			menuTest.update(getGraphics());
+			actu.stop();
 		}
 	}
 	
 	public void boucle() {
-		menuTest.repaint();
 		Ennemis cur = listeEnnemis.root;
 		while(cur != null){
 			cur.moveAleatoire2(bordureGauche, bordureDroite, bordureHaut, bordureBas);
@@ -329,8 +287,6 @@ public class Fenetre extends JFrame{
 					cur.dposy = - cur.dposy;
 					prev.moveBasique(true, true);
 					cur.moveBasique(true, true);
-					/*prev.setVie(5);
-					cur.setVie(5);*/
 				}
 				if(cur != null){
 					cur = cur.next;
@@ -478,11 +434,55 @@ public class Fenetre extends JFrame{
 			listeEnnemis.suppr(e.getEnnemi());
 		}
 	}
-    
-    public static void main(String[] args) {
+	
+	public static void main(String[] args) {
 
 		Fenetre game = new Fenetre();
+		//game.menuTest.update(game.getGraphics());
 
     }
+	
+	/* METHODES DE DEBUGAGE */
+	
+	/* Visualisation bordures */
+	private void showBordures(Graphics gb){
+		gb.setColor(Color.green);
+		Case curc = bordureBas.root;
+		while(curc != null){
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+		gb.setColor(Color.pink);
+		curc = bordureHaut.root;
+		while(curc != null){
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+		gb.setColor(Color.orange);
+		curc = bordureGauche.root;
+		while(curc != null){
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+		gb.setColor(Color.red);
+		curc = bordureDroite.root;
+		while(curc != null){
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+	}
+	
+	/* Visualisation Rectangle + Arc2D entourant les ennemis */
+	private void showContoursEnnemi(Graphics gb, Ennemis bob){
+		gb.setColor(Color.red);
+		gb.fillRect(bob.getPosx(),bob.getPosy(),bob.cadre.width,bob.cadre.height);
+        gb.setColor(Color.blue);
+        gb.fillArc(bob.getPosx(), bob.getPosy(), bob.cadre.width, bob.cadre.height, 0, 360);
+	}
+	
+	/* Visualisation Arc2D portee des tours */
+	private void showPorteeTour(Graphics gb, Tour eiffel){
+		gb.fillArc(eiffel.getPosx()-(int)eiffel.portee.getWidth()/2 + eiffel.cadre.width/2, eiffel.getPosy()-(int)eiffel.portee.getHeight()/2+ eiffel.cadre.height/2, (int)eiffel.portee.getWidth(), (int)eiffel.portee.getHeight(), 0, 360);
+	}
     
 }
