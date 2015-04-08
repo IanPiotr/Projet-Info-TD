@@ -50,6 +50,14 @@ public class Fenetre extends JFrame{
         /* INIT BUFFER */
         Dimension dim = getSize();
         monBuf = new BufferedImage(dim.width-300,dim.height,BufferedImage.TYPE_INT_RGB); //-300 car le menu fait 300 de large
+        //changement de la police de caractere
+		try{
+			font = Font.createFont(Font.TRUETYPE_FONT, new File("bat.ttf"));
+			monBuf.getGraphics().setFont(font.deriveFont(15.0f));
+		}
+		catch(Exception err){
+			System.out.println("police yen a pas fonctionner. Lol.");
+		}
 		
 		/* INIT JOUEUR */
         bizuth = new Joueur("Bizuth1");
