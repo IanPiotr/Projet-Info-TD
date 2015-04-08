@@ -50,7 +50,7 @@ public class Menu extends JLayeredPane {
 		MonSousMenuJoueur.setLayout(new GridLayout(3,1));
 		MonSousMenuJeu = new JPanel();
 		MonSousMenuJeu.setLayout(new GridLayout(2,1));
-		MonSousMenuJeu.setBackground(Color.gray);
+		MonSousMenuJeu.setBackground(Color.orange);
 		
 		bizuth = gameur;
 		
@@ -91,7 +91,7 @@ public class Menu extends JLayeredPane {
 		Groupement.add(MonSousMenuTour);
 		Groupement.add(MonSousMenuJoueur);
 		Groupement.add(MonSousMenuJeu);
-		Groupement.setBounds(897,0,285,740);
+		Groupement.setBounds(900,0,300,730);
 		
 		this.add(Groupement, new Integer(200));
 			
@@ -188,14 +188,7 @@ public class Menu extends JLayeredPane {
 	
 	
 	public static void main (String args[]) {
-		Fenetre test = new Fenetre();
-        Joueur Bizuth = new Joueur("P'tit loup");
-		Menu MenuTest = new Menu(Bizuth, test);
-		test.getContentPane().add(MenuTest);
-		test.setSize(1200,740);
-        test.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        test.setResizable(true);
-        test.setVisible(true);        
+	Fenetre test = new Fenetre();
 	}
 
 }
