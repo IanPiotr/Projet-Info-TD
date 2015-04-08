@@ -43,7 +43,7 @@ public class Fenetre extends JFrame{
         /* INIT FRAME */
         super("Tower Defens' Bro !");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200,730);
+        setSize(1203,770);
         setResizable(true);
         ecran = new Rectangle(getInsets().left, getInsets().top+20, getSize().width-getInsets().right-300, getSize().height-getInsets().bottom-10);
         
