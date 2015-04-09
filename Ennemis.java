@@ -38,7 +38,7 @@ public abstract class Ennemis extends Element{
         
         posx = px;
         posy = py;
-		dposx = 1;
+		dposx = 0;
 		dposy = 1;
 		vitesse = vit;
 		
@@ -104,24 +104,34 @@ public abstract class Ennemis extends Element{
 	 * Pour utiliser un ecouteur mortListener de mort d'un ennemi
 	 */
 	 
-	public void addMortListener(mortListener ml){
-		listeners.add(mortListener.class, ml);
+	public void addEnnemiListener(EnnemiListener el){
+		listeners.add(EnnemiListener.class, el);
 	}
 
-	public void removeMortListener(mortListener ml){
-		listeners.remove(mortListener.class, ml);
+	public void removeEnnemiListener(EnnemiListener el){
+		listeners.remove(EnnemiListener.class, el);
 	}
 
-	public mortListener[] getMortListeners() {
-		return listeners.getListeners(mortListener.class);
+	public EnnemiListener[] getEnnemiListeners() {
+		return listeners.getListeners(EnnemiListener.class);
 	}
 	
 	protected void fireEnnemiMort(Ennemis ennemi){
-		mortEvent event = null;
-		for(mortListener ml : getMortListeners()){
+		EnnemiEvent event = null;
+		for(EnnemiListener el : getEnnemiListeners()){
 			if(event == null){
-				event = new mortEvent(ennemi);
-				ml.ennemiMort(event);
+				event = new EnnemiEvent(ennemi);
+				el.ennemiMort(event);
+			}
+		}
+	}
+	
+	protected void fireEnnemiVictorieux(Ennemis ennemi){
+		EnnemiEvent event = null;
+		for(EnnemiListener el : getEnnemiListeners()){
+			if(event == null){
+				event = new EnnemiEvent(ennemi);
+				el.ennemiVictorieux(event);
 			}
 		}
 	}
@@ -341,6 +351,95 @@ public abstract class Ennemis extends Element{
 		}
 	}
 	//*//
+	
+	/* METHODE TRAVERSEMENT CHEMIN ENNEMIS
+	 * Mouvements visant a faire traverser la carte aux ennemis,
+	 * "le plus vite possible"
+	 * (ceci sera toujours ameliorable)
+	 */
+	public void moveChemin(ListeCases lg, ListeCases ld, ListeCases lh, ListeCases lb){
+		 	//Nouvelle potentielle position
+		setPos(posx + (int)(vitesse*dposx), posy + (int)(dposy*vitesse));
+		
+			//Verification colision sur les murs
+		Case cur;
+				//Mur de GAUCHE
+		cur = lg.root;
+		while(cur != null){
+			if(cur.intersects(cadre)){
+				//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
+				if(cur.hybride){
+					//Cas de la case bordure GAUCHE et BAS, s'il a en fait tape en bas
+					if(cadre.y + cadre.height <= cur.y + 4){	//Ce 4 représente la penetration possible du sbire dans la case bordure
+						setPosy(cur.y - cadre.height);			//Fonction de la vitesse du sbire et de son angle d'approche => cas le plus emmerdant a prendre, la diago
+						//dposy = 0;								//Un bug constate avec 3
+						dposx = 1;
+					} else { //Sinon cas normal
+						setPosx(cur.x + cur.width);
+						//dposx = -dposx;
+					}
+				} else {
+					setPosx(cur.x + cur.width);
+					//dposx = -dposx;
+				}
+			}
+			cur = cur.next;
+		}
+				//Mur de DROITE
+		cur = ld.root;
+		while(cur != null){
+			if(cur.intersects(cadre)){
+				//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
+				if(cur.hybride){
+					//Cas de la case bordure DROITE et HAUT
+					if(cadre.y >= cur.y + cur.height - 4){
+						setPosy(cur.y + cur.height);
+						dposy = 1;
+						//Sinon cas normal
+					} else {
+						setPosx(cur.x - cadre.width);
+						//dposx = 0;
+						dposy = 1;
+					}
+				} else {
+					setPosx(cur.x - cadre.width);
+					//dposx = 0;
+					dposy = 1;
+				}
+			}
+			cur = cur.next;
+		}
+				//Mur du HAUT
+		cur = lh.root;
+		while(cur != null){
+			if(cur.intersects(cadre)){
+				setPosy(cur.y + cur.height);
+				dposx = 1;
+			}
+			cur = cur.next;
+		}
+				//Mur du BAS
+		cur = lb.root;
+		while(cur != null){
+			if(cur.intersects(cadre)){
+				setPosy(cur.y - cadre.height);
+				dposx = 1;
+			}
+			cur = cur.next;
+		}
+		
+			//Si chemin au bord inferieur de l'ecran
+		if(posy > limEcran.y + limEcran.height){
+			fireEnnemiVictorieux(this);
+		}
+	 
+	}
+	//*//
+	 
+	 public void stop(){
+		 dposx = 0;
+		 dposy = 0;
+	 }
 	
 	/* METHODE MOUVEMENTS BROWNIEN ENNEMIS
 	 * Mouvement aleatoire type brownien

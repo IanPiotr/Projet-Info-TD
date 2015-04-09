@@ -17,17 +17,17 @@ public class Sbire1 extends Ennemis{
 	public static final String nomImage = "Sbire1.png";
 	
 	public Sbire1(Rectangle fenetre){
-		super(nomImage, fenetre.width/4, fenetre.height/4, 200, 3);
+		super(nomImage, fenetre.width/4, fenetre.height/4, 70, 3);
 		limEcran = fenetre;	//meme pointeur, c'est ce qu'il me faut
 	}
 	
 	public Sbire1(Rectangle fenetre, int x, int y){
-		super(nomImage, x, y, 1000, 2);	
+		super(nomImage, x, y, 70, 2);	
 		limEcran = fenetre;	//meme pointeur, c'est ce qu'il me faut
 	}
 	
 	public Sbire1(Rectangle fenetre, int x, int y, int num){
-		super(nomImage, x, y, 1000, 2);	
+		super(nomImage, x, y, 70, 2);	
 		limEcran = fenetre;	//meme pointeur, c'est ce qu'il me faut
 		IDEnnemi = num;
 	}

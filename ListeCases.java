@@ -11,10 +11,10 @@ public class ListeCases{
         root = c;
     }
     
-    public void insertTete2(Case c){
+    /*public void insertTete2(Case c){
 		c.next2 = root;
         root = c;
-    }
+    }*/
     
     public void supprTete(){
 		root = root.next;

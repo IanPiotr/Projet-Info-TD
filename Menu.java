@@ -24,9 +24,10 @@ public class Menu extends JLayeredPane {
 	private JButton [] MesTours;
 	private JButton [] MesPieges;
 	private JButton start;
+	private JButton nom;
 	protected JButton argent;
-	private JButton vie;
-	private JLabel infoJeu; // permet de donner des infos au joueur
+	protected JButton vie;
+	protected JLabel infoJeu; // permet de donner des infos au joueur
 	private static final ImageIcon iconTour1 = new ImageIcon("Tour1.png");
 	private static final ImageIcon iconPiege1 = new ImageIcon("Piege1.png");
 	private static final ImageIcon iconVie = new ImageIcon("coeur.png");
@@ -70,14 +71,14 @@ public class Menu extends JLayeredPane {
 			MesPieges[i].addActionListener(new BDefense());
 		}
 		
-		JButton nom = new JButton("Nom : " + gameur.name, iconUser);
+		nom = new JButton("Nom : " + gameur.name, iconUser);
 		vie = new JButton(" PV : " + gameur.vie, iconVie);
 		argent = new JButton("Argent : " + gameur.argent + "$", iconArgent);
 		MonSousMenuJoueur.add(nom);
 		MonSousMenuJoueur.add(vie);
 		MonSousMenuJoueur.add(argent);
 		
-		JButton start = new JButton(" ", iconStart);
+		start = new JButton(" ", iconStart);
 		start.addActionListener(new BDefense());
 		
 		infoJeu = new JLabel("Bonjour à toi mon petit, prépares toi!");
@@ -112,6 +113,10 @@ public class Menu extends JLayeredPane {
 	
 	public JLabel getInfoJeu(){
 		return infoJeu;
+	}
+	
+	public JButton getStart(){
+		return start;
 	}
 	
 	public class BDefense implements ActionListener{
@@ -188,7 +193,11 @@ public class Menu extends JLayeredPane {
 	
 	
 	public static void main (String args[]) {
-	Fenetre test = new Fenetre();
+		Fenetre test = new Fenetre();
+		//Menu menuTest = new Menu(Bizuth, test);
+		//test.getContentPane().add(MenuTest);
+		// test.menuTest.update(test.getGraphics());
+
 	}
 
 }

@@ -27,17 +27,19 @@ public class Fenetre extends JFrame{
     private BufferedImage monBuf;
     private Timer timer;
     private Timer actu;
+    private Timer spawn;
     private Tour1 eiffel;
     protected Joueur bizuth;
     private Sbire1 bob;
     private ListeEnnemis listeEnnemis;
     private ListeTour listeTour;
-    private Menu menuTest;
+    protected Menu menuTest;
     private Case[][] tabCases;
     private ListeCases bordureDroite;
     private ListeCases bordureGauche;
     private ListeCases bordureHaut;
     private ListeCases bordureBas;
+    public int nbSpawn;
 
 	public Fenetre() {
         /* INIT FRAME */
@@ -50,46 +52,32 @@ public class Fenetre extends JFrame{
         /* INIT BUFFER */
         Dimension dim = getSize();
         monBuf = new BufferedImage(dim.width-300,dim.height,BufferedImage.TYPE_INT_RGB); //-300 car le menu fait 300 de large
-        //changement de la police de caractere
-		try{
-			font = Font.createFont(Font.TRUETYPE_FONT, new File("bat.ttf"));
-			monBuf.getGraphics().setFont(font.deriveFont(15.0f));
-		}
-		catch(Exception err){
-			System.out.println("police yen a pas fonctionner. Lol.");
-		}
 		
 		/* INIT JOUEUR */
         bizuth = new Joueur("Bizuth1");
         
         /* INIT ENNEMIS */
         listeEnnemis = new ListeEnnemis();
-        bob = new Sbire1(ecran, 550, 650, 0);
-        listeEnnemis.insertTete(bob);
-        bob.addMortListener(new EcouteurMortSbire());
-        for(int i = 1; i < 15; i++){
-			Sbire1 sbire;
-			if(i<7){
-				sbire = new Sbire1(ecran, 360, (int)(60*i +30*Math.random()), i);
-			} else if(i<10){
-				sbire = new Sbire1(ecran, (int)(50 + 50*i +25*Math.random()), 360, i);
-			} else {
-				sbire = new Sbire1(ecran, 480, (int)(50*i +25*Math.random()), i);
-			}
-			sbire.addMortListener(new EcouteurMortSbire());
-			listeEnnemis.insertTete(sbire);
-		}
+		//spawnTest();
 		
 		/* INIT TOURS */
         listeTour = new ListeTour();
-        eiffel = new Tour1(ecran, 270, 200);
+        eiffel = new Tour1(ecran, 240, 200);
         listeTour.insertTete(eiffel);
         
         /* INIT MENU */
         menuTest = new Menu(bizuth, this);
 		getContentPane().add(menuTest);
+		menuTest.getStart().addActionListener(new EcouteurBoutonStart());
 		
-		
+        /* INIT TIMER */
+        timer = new Timer(15, new letsDance());
+        timer.start();
+        actu = new Timer(100, new actuFuckingMenu());
+        //actu.start();
+        spawn = new Timer(500, new letsSpawn());
+        //spawn.start();
+        nbSpawn = 0;
        
         /* INIT QUADRILAGE DE LA CARTE
          * Uniquement sur la zone jouable
@@ -112,7 +100,7 @@ public class Fenetre extends JFrame{
 			}
 		}
 		for(int i=16; i<20; i++){
-			for(int j=14; j<24; j++){
+			for(int j=14; j<25; j++){
 				tabCases[i][j].setChemin(true);
 			}
 		}
@@ -196,13 +184,7 @@ public class Fenetre extends JFrame{
 				}
 			}
 		}
-        
-        /* INIT TIMER */
-        timer = new Timer(10, new letsDance());
-        timer.start();
-        actu = new Timer(100, new actuFuckingMenu());
-        //actu.start();
-        
+
         this.addMouseListener(new EcouteurClicSouris());
         setVisible(true); // A mettre a la fin, sinon grosse erreur lors du premier dessin !
         
@@ -230,12 +212,13 @@ public class Fenetre extends JFrame{
 		 * Visualisation portee tours
 		 */
 		//showBordures(gb);
-        showContoursEnnemi(gb, bob);
+        //showContoursEnnemi(gb, bob);
 		showPorteeTour(gb, eiffel);
 		/* PEINTURE ENNEMIS */
 		gb.setColor(Color.white);
 		Ennemis cur = listeEnnemis.root;
 		while(cur != null){
+			//showContoursEnnemi(gb, cur);
 			cur.draw(gb);
 			gb.drawString(Integer.toString(cur.getVie()) , cur.getPosx() + 10, cur.getPosy());
 			cur = cur.next;
@@ -253,7 +236,6 @@ public class Fenetre extends JFrame{
     
     public class letsDance implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			menuTest.repaint();
 			boucle();
 		}
 	}
@@ -265,37 +247,57 @@ public class Fenetre extends JFrame{
 		}
 	}
 	
+	public class letsSpawn implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			Sbire1 sbire = new Sbire1(ecran, 275 + (int)(100*Math.random()), 0, nbSpawn);
+			sbire.addEnnemiListener(new EcouteurEnnemi());
+			listeEnnemis.insertQueue(sbire);
+			if(nbSpawn == 100){
+				spawn.stop();
+				nbSpawn = 0;
+				menuTest.infoJeu.setText("Fin du Spawn !");
+			} else {
+				nbSpawn++;
+			}
+		}
+	}
+	
 	public void boucle() {
 		Ennemis cur = listeEnnemis.root;
 		while(cur != null){
-			cur.moveAleatoire2(bordureGauche, bordureDroite, bordureHaut, bordureBas);
+			cur.moveChemin(bordureGauche, bordureDroite, bordureHaut, bordureBas);
 			cur = cur.next;
 		}
 		
-		/* GESTION BOUSCULADE - ESSAI
-		 * essayons de se faire rentrer dedans bob et ses compatriotes
-		 * NB : fonctionne correctement SAUF si intersection au depart,
-		 * 		ou eventuels cas tres particuliers (moveBrownien)
-		 * 		qui ne semble pas etre regle par une double verification des chocs
-		 * 		Multi-bousculade = No problem avec 21 sbires
+		/* GESTION BOUSCULADE - ESSAI CHEMIN
+		 * Essayons de se faire rentrer dedans les differents ennemis
+		 * La tete de liste (=listeEnnemis.root = racine) contient le plus vieil ennemi,
+		 * c'est a dire celui qui a spawn il y a le plus de temps,
+		 * et qui n'est ni mort ni victorieux
+		 * La priorite lui est donnee :
+		 * il doit TOUJOURS se debloquer. Les autres attendent que se soit fait
+		 * Pas de problemes avec la multi attente ; phenome de queue-leu-leu
+		 * NB : fonctionne desormais a priori correctement, pour un timer de spawn de 500ms
+		 * 		De plus gros bugs pour un timer inferieur, mais d'une autre nature que les initiaux
 		 */
 		Ennemis prev = listeEnnemis.root;
 		if(prev != null){
 			cur = prev.next;
 		}
-			
+		//Exception de l'ennemi le plus vieux faite par la nature de cette double boucle
+		//En effet, si prev == listeEnnemis.root, c'est bien listeEnnemis.root.next qu'on deplace
 		while(prev != null){
 			while(cur != null){
-				if(prev.collision(cur)){
-					double tampx = prev.dposx;
-					double tampy = prev.dposy;
-					prev.dposx = - prev.dposx;
-					prev.dposy = - prev.dposy;
-					cur.dposx = - cur.dposx;
-					cur.dposy = - cur.dposy;
-					prev.moveBasique(true, true);
+				cur.dposx = - cur.dposx;
+				cur.dposy = - cur.dposy;
+				//Si l'ennemi courant est coince par un ennemi plus vieux, on recule jusqu'a la FIN de l'intersection,
+				//pour etre sur de ne jamais chevaucher un autre ennemi a la fin du deplacement
+				while(prev.collision(cur)){
 					cur.moveBasique(true, true);
 				}
+				//On remet l'ennemi dans le bon sens de mouvement
+				cur.dposx = - cur.dposx;
+				cur.dposy = - cur.dposy;
 				if(cur != null){
 					cur = cur.next;
 				}
@@ -307,10 +309,11 @@ public class Fenetre extends JFrame{
 		}
 		/* FIN DE L'ESSAI */
 		
-		/* GESTION TIR - ESSAI
+		/* GESTION TIR - ESSAI AVEC FOCUS
 		 * Essayons de faire perdre de la vie aux ennemis
 		 * lorsqu'ils passent a proximite d'une tour
 		 * C'est a dire lorsqu'ils sont dans le cercle portee des tours
+		 * Gestion du focus par un simple break et le placement en tete de liste du sbire le plus vieux !
 		 */
 		Tour curT = listeTour.root;
 		while(curT != null){
@@ -318,6 +321,9 @@ public class Fenetre extends JFrame{
 			while(curE != null){
 				if(curT.collision(curE)){
 					curE.setVie(curT.puissance);
+					break;	//Permet le FOCUS d'un UNIQUE ennemi
+							//Pour 2 ? Mettre un compteur et break a deux ! :)
+							//On pourra differencier les cas suivant la nature des tours
 				}
 				if(curE != null){
 					curE = curE.next;
@@ -328,7 +334,7 @@ public class Fenetre extends JFrame{
 			}
 		}
 		/* FIN DE L'ESSAI */
-		menuTest.repaint();
+		//menuTest.repaint();
 		repaint();
 	}
 	
@@ -433,13 +439,39 @@ public class Fenetre extends JFrame{
 		
 	}
 	
-	private class EcouteurMortSbire implements mortListener {
+	public class EcouteurBoutonStart implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			if(((JButton)(e.getSource())).getText().equals(" ")){
+				spawn.start();
+				menuTest.infoJeu.setText("Le Spawn a commence !");
+			}
+		}
+	}
+	
+	private class EcouteurEnnemi implements EnnemiListener {
 		
-		public void ennemiMort(mortEvent e){
+		public void ennemiMort(EnnemiEvent e){
 			System.out.print("Un ennemi est mort !! ");
 			System.out.println(e.getEnnemi());
-			e.getEnnemi().removeMortListener(this);
+			e.getEnnemi().removeEnnemiListener(this);
 			listeEnnemis.suppr(e.getEnnemi());
+			if(listeEnnemis.root == null){
+				menuTest.infoJeu.setText("Place un truc !");
+				System.out.println("Bug d'affichage sur infoJeu, je suis bien passe par la");
+			}
+		}
+		
+		public void ennemiVictorieux(EnnemiEvent e){
+			System.out.print("Un ennemi est victorieux ! ");
+			System.out.println(e.getEnnemi());
+			bizuth.setVie(1);
+			menuTest.vie.setLabel("PV : " + bizuth.vie);
+			e.getEnnemi().removeEnnemiListener(this);
+			listeEnnemis.suppr(e.getEnnemi());
+			if(listeEnnemis.root == null){
+				menuTest.infoJeu.setText("Place un truc !");
+				System.out.println("Bug d'affichage sur infoJeu, je suis bien passe par la");
+			}
 		}
 	}
 	
@@ -490,7 +522,26 @@ public class Fenetre extends JFrame{
 	
 	/* Visualisation Arc2D portee des tours */
 	private void showPorteeTour(Graphics gb, Tour eiffel){
+		gb.setColor(Color.orange);
 		gb.fillArc(eiffel.getPosx()-(int)eiffel.portee.getWidth()/2 + eiffel.cadre.width/2, eiffel.getPosy()-(int)eiffel.portee.getHeight()/2+ eiffel.cadre.height/2, (int)eiffel.portee.getWidth(), (int)eiffel.portee.getHeight(), 0, 360);
 	}
     
+    /* Spawn de quelques Ennemis dans le chemin pour voir leurs deplacements */
+    private void spawnTest(){
+		bob = new Sbire1(ecran, 550, 650, 0);
+        listeEnnemis.insertTete(bob);
+        bob.addEnnemiListener(new EcouteurEnnemi());
+        for(int i = 1; i < 10; i++){
+			Sbire1 sbire;
+			if(i<7){
+				sbire = new Sbire1(ecran, 360, (int)(30*i +10*Math.random()), i);
+			} else if(i<9){
+				sbire = new Sbire1(ecran, (int)(40 + 30*i +10*Math.random()), 360, i);
+			} else {
+				sbire = new Sbire1(ecran, 480, (int)(30*i +10*Math.random()), i);
+			}
+			sbire.addEnnemiListener(new EcouteurEnnemi());
+			listeEnnemis.insertTete(sbire);
+		}
+	}
 }

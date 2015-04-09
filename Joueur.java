@@ -16,7 +16,7 @@ public class Joueur {
 	
 	public String name;
 	public int argent;
-	public int vie;
+	protected int vie;
 	JPanel cadreJoueur;
 
 
@@ -36,6 +36,13 @@ public class Joueur {
         
 	}
 	
+	public void setVie(int degats){
+		vie -= degats;
+	}
+	
+	public int getVie(){
+		return vie;
+	}
 	
 	
 }

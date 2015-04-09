@@ -1,8 +1,8 @@
-public class mortEvent{
+public class EnnemiEvent{
 
 	private Ennemis ennemi;
 	
-	public mortEvent(Ennemis ennemi){
+	public EnnemiEvent(Ennemis ennemi){
 		this.ennemi = ennemi;
 	}
 	

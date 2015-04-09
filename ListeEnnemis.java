@@ -11,6 +11,22 @@ public class ListeEnnemis{
         root = ennem;
     }
     
+    public void insertQueue(Ennemis ennem){
+		Ennemis prev = root;
+		Ennemis cur;
+		if(prev != null){
+			cur = prev.next;
+			while(cur != null){
+				prev = cur;
+				cur = cur.next;
+			}
+			prev.next = ennem;
+		} else {
+			root = ennem;
+		}
+	}
+		
+    
     public void supprTete(){
 		root = root.next;
 	}
