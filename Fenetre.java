@@ -81,29 +81,10 @@ public class Fenetre extends JFrame{
        
         /* INIT QUADRILAGE DE LA CARTE
          * Uniquement sur la zone jouable
-         * Chemin predefini pour le moment
          */
         tabCases = new Case[(getWidth()-300)/Case.LCASE][getHeight()/Case.LCASE];
-        for(int i=0; i<tabCases.length; i++){
-			for(int j=0; j<tabCases[0].length;j++){
-				tabCases[i][j]= new Case(i*Case.LCASE, j*Case.LCASE);
-			}
-		}
-		for(int i=10; i<14; i++){
-			for(int j=0; j<10; j++){
-				tabCases[i][j].setChemin(true);
-			}
-		}
-        for(int i=10; i<20; i++){
-			for(int j=10; j<14; j++){
-				tabCases[i][j].setChemin(true);
-			}
-		}
-		for(int i=16; i<20; i++){
-			for(int j=14; j<25; j++){
-				tabCases[i][j].setChemin(true);
-			}
-		}
+        GeneAleat.aleat2(tabCases);
+
 		
 		/* INIT BORDURES CHEMIN
 		 * Une case ne doit pas appartenir a deux listes, sinon conflit (pointeurs)
