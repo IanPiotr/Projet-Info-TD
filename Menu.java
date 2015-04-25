@@ -38,7 +38,7 @@ public class Menu extends JLayeredPane {
 	private Joueur bizuth;
 	
 	
-	public Menu(Joueur gameur, Fenetre fenetreJeu){
+	public Menu(Joueur gameur){
 		super();
 		setPreferredSize(new Dimension(285, 740));
 		setDoubleBuffered(true);
@@ -94,7 +94,7 @@ public class Menu extends JLayeredPane {
 		Groupement.add(MonSousMenuJeu);
 		Groupement.setBounds(900,0,300,730);
 		
-		this.add(Groupement, new Integer(200));
+		this.add(Groupement, JLayeredPane.DEFAULT_LAYER);
 			
 	}
 	

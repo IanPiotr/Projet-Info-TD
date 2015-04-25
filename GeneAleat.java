@@ -25,22 +25,32 @@ public abstract class GeneAleat{
 	/*POUR GENERER LE CHEMIN PREDEFINI EN ATTENDANT QUE LA GENERATION ALEATOIRE SOIT AU POINT*/
 	public static void predefini(Case[][] tabCases){
 		
-		for(int i=10; i<14; i++){
-				for(int j=0; j<10; j++){
-					tabCases[i][j].setChemin(true);
-				}
-			}
-			for(int i=10; i<20; i++){
-				for(int j=10; j<14; j++){
-					tabCases[i][j].setChemin(true);
-				}
-			}
-			for(int i=16; i<20; i++){
-				for(int j=14; j<24; j++){
-					tabCases[i][j].setChemin(true);
-				}
+		for(int i=15; i<19; i++){
+			for(int j=0; j<10; j++){
+				tabCases[i][j].setChemin(true);
 			}
 		}
+        for(int i=18; i>9; i--){
+			for(int j=10; j<14; j++){
+				tabCases[i][j].setChemin(true);
+			}
+		}
+		for(int i=13; i>9; i--){
+			for(int j=14; j<18; j++){
+				tabCases[i][j].setChemin(true);
+			}
+		}
+		for(int i=10; i<25; i++){
+			for(int j=18; j<22; j++){
+				tabCases[i][j].setChemin(true);
+			}
+		}
+		for(int i=21; i<25; i++){
+			for(int j=21; j<25; j++){
+				tabCases[i][j].setChemin(true);
+			}
+		}
+	}
 		
 		/*PREMIERE METHODE DE GENERATION ALEATOIRE*/
 		public static void aleat1(Case[][] tabCases){

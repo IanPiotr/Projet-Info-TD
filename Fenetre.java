@@ -23,16 +23,15 @@ import javax.swing.JTextField;
 
 public class Fenetre extends JFrame{
 
+	//private static final long serialVersionUID = 43L; 
 	private Rectangle ecran;
-    private BufferedImage monBuf;
+    protected BufferedImage monBuf;
     private Timer timer;
-    private Timer actu;
     private Timer spawn;
-    private Tour1 eiffel;
     protected Joueur bizuth;
-    private Sbire1 bob;
     private ListeEnnemis listeEnnemis;
     private ListeTour listeTour;
+    private ListeElement listeBarrieres;
     protected Menu menuTest;
     private Case[][] tabCases;
     private ListeCases bordureDroite;
@@ -51,7 +50,7 @@ public class Fenetre extends JFrame{
         
         /* INIT BUFFER */
         Dimension dim = getSize();
-        monBuf = new BufferedImage(dim.width-300,dim.height,BufferedImage.TYPE_INT_RGB); //-300 car le menu fait 300 de large
+        monBuf = new BufferedImage(dim.width,dim.height,BufferedImage.TYPE_INT_RGB);
 		
 		/* INIT JOUEUR */
         bizuth = new Joueur("Bizuth1");
@@ -62,29 +61,34 @@ public class Fenetre extends JFrame{
 		
 		/* INIT TOURS */
         listeTour = new ListeTour();
-        eiffel = new Tour1(ecran, 240, 200);
-        listeTour.insertTete(eiffel);
+        
+        /* INIT BARRIERES */
+        listeBarrieres = new ListeElement();
         
         /* INIT MENU */
-        menuTest = new Menu(bizuth, this);
+        menuTest = new Menu(bizuth);
 		getContentPane().add(menuTest);
 		menuTest.getStart().addActionListener(new EcouteurBoutonStart());
 		
         /* INIT TIMER */
         timer = new Timer(15, new letsDance());
         timer.start();
-        actu = new Timer(100, new actuFuckingMenu());
-        //actu.start();
         spawn = new Timer(500, new letsSpawn());
-        //spawn.start();
         nbSpawn = 0;
        
         /* INIT QUADRILAGE DE LA CARTE
          * Uniquement sur la zone jouable
+         * Chemin predefini pour le moment
          */
         tabCases = new Case[(getWidth()-300)/Case.LCASE][getHeight()/Case.LCASE];
-        GeneAleat.aleat2(tabCases);
-
+        for(int i=0; i<tabCases.length; i++){
+			for(int j=0; j<tabCases[0].length;j++){
+				tabCases[i][j]= new Case(i*Case.LCASE, j*Case.LCASE);
+			}
+		}
+		GeneAleat.predefini(tabCases);
+		//GeneAleat.aleat1(tabCases);
+		//GeneAleat.aleat2(tabCases);
 		
 		/* INIT BORDURES CHEMIN
 		 * Une case ne doit pas appartenir a deux listes, sinon conflit (pointeurs)
@@ -116,7 +120,8 @@ public class Fenetre extends JFrame{
 						nc.hybride = true;
 						bordureDroite.insertTete(nc);
 					}
-				} else if(tabCases[i][j].chemin && !tabCases[i][j+1].chemin){
+				}
+				if(tabCases[i][j].chemin && !tabCases[i][j+1].chemin){
 					if(!tabCases[i][j+1].bordure){
 						bordureBas.insertTete(tabCases[i][j+1]);
 						tabCases[i][j+1].bordure = true;
@@ -167,12 +172,21 @@ public class Fenetre extends JFrame{
 		}
 
         this.addMouseListener(new EcouteurClicSouris());
+        
         setVisible(true); // A mettre a la fin, sinon grosse erreur lors du premier dessin !
         
 	}
 	
+	/* METHODE PAINT
+	 * Redessine pour le moment TOUT a chaque tour de boucle dans un buff, puis le buff
+	 * Trois methode de debugages disponibles :
+	 * showBordures(gb)				pour visualiser les bordures du chemin
+	 * showContoursEnnemi(gb, bob)	pour visualiser les zones de contact entre ennemis
+	 * showPorteeTour(gb, eiffel)	pour visualiser la portee des tours
+	 */
 	public void paint(Graphics g) {
 		Graphics gb = monBuf.getGraphics();
+		menuTest.paint(gb);
 		/* PEINTURE FOND */
 		for(int i=0; i<tabCases.length; i++){
 			for(int j=0; j<tabCases[0].length;j++){
@@ -187,14 +201,19 @@ public class Fenetre extends JFrame{
 				tabCases[i][j].drawCase(gb);
 			}
 		}
-		/* PEINTURE TESTS
-		 * Visualisation bordures chemin
-		 * Visualisation zones de contact
-		 * Visualisation portee tours
-		 */
-		//showBordures(gb);
-        //showContoursEnnemi(gb, bob);
-		showPorteeTour(gb, eiffel);
+		/* PEINTURE TOURS */
+		Tour cur2 = listeTour.root;
+		while(cur2 != null){
+			showPorteeTour(gb, cur2);
+			cur2.draw(gb);
+			cur2 = cur2.next;
+		}
+		/* PEINTURE BARRIERES */
+		Element cur3 = listeBarrieres.root;
+		while(cur3 != null){
+			cur3.draw(gb);
+			cur3 = cur3.next;
+		}
 		/* PEINTURE ENNEMIS */
 		gb.setColor(Color.white);
 		Ennemis cur = listeEnnemis.root;
@@ -204,14 +223,9 @@ public class Fenetre extends JFrame{
 			gb.drawString(Integer.toString(cur.getVie()) , cur.getPosx() + 10, cur.getPosy());
 			cur = cur.next;
 		}
-		/* PEINTURE TOURS */
-		Tour cur2 = listeTour.root;
-		while(cur2 != null){
-			cur2.draw(gb);
-			cur2 = cur2.next;
-		}
+		
 		/* DESSIN GLOBAL */
-        g.drawImage(monBuf,0,0,null);
+        g.drawImage(monBuf,8,31,null);
         
     }
     
@@ -221,19 +235,12 @@ public class Fenetre extends JFrame{
 		}
 	}
 	
-	public class actuFuckingMenu implements ActionListener{
-		public void actionPerformed(ActionEvent e){
-			menuTest.update(getGraphics());
-			actu.stop();
-		}
-	}
-	
 	public class letsSpawn implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			Sbire1 sbire = new Sbire1(ecran, 275 + (int)(100*Math.random()), 0, nbSpawn);
+			Sbire1 sbire = new Sbire1(ecran, 425 + (int)(150*Math.random()), -31, nbSpawn);
 			sbire.addEnnemiListener(new EcouteurEnnemi());
 			listeEnnemis.insertQueue(sbire);
-			if(nbSpawn == 100){
+			if(nbSpawn == 14){
 				spawn.stop();
 				nbSpawn = 0;
 				menuTest.infoJeu.setText("Fin du Spawn !");
@@ -246,7 +253,7 @@ public class Fenetre extends JFrame{
 	public void boucle() {
 		Ennemis cur = listeEnnemis.root;
 		while(cur != null){
-			cur.moveChemin(bordureGauche, bordureDroite, bordureHaut, bordureBas);
+			cur.moveChemin(tabCases, bordureGauche, bordureDroite, bordureHaut, bordureBas);
 			cur = cur.next;
 		}
 		
@@ -271,14 +278,22 @@ public class Fenetre extends JFrame{
 			while(cur != null){
 				cur.dposx = - cur.dposx;
 				cur.dposy = - cur.dposy;
+				boolean aquecollision = false;
 				//Si l'ennemi courant est coince par un ennemi plus vieux, on recule jusqu'a la FIN de l'intersection,
 				//pour etre sur de ne jamais chevaucher un autre ennemi a la fin du deplacement
 				while(prev.collision(cur)){
 					cur.moveBasique(true, true);
+					aquecollision = true;
 				}
-				//On remet l'ennemi dans le bon sens de mouvement
-				cur.dposx = - cur.dposx;
-				cur.dposy = - cur.dposy;
+				//On remet l'ennemi dans le bon sens de mouvement, sauf s'il en a tape un autre (pour se faire pousser par un plus vieux)
+				if(!aquecollision){
+					cur.dposx = - cur.dposx;
+				} else {	//On avance dans le meme sens que les vieux
+					cur.dposx = prev.dposx;
+					cur.buteeBas = prev.buteeBas;
+					cur.enBas = true;	//On suit le vieux, on lui fait confiance, on ne re-check pas le bas
+				}
+				cur.dposy = -cur.dposy;
 				if(cur != null){
 					cur = cur.next;
 				}
@@ -314,8 +329,10 @@ public class Fenetre extends JFrame{
 				curT = curT.next;
 			}
 		}
+		
+		//testCollisionBarrieres();
+		
 		/* FIN DE L'ESSAI */
-		//menuTest.repaint();
 		repaint();
 	}
 	
@@ -332,62 +349,62 @@ public class Fenetre extends JFrame{
 				if(e.getX() < ecran.width - 12 && e.getY() < ecran.height - 25){
 					
 				switch(menuTest.getVariable()){
-					//NB : 	les Tour1 sont placees par leur centre (d'ou le -12 -20)
+					//NB : 	les Tour1 sont placees par leur centre (d'ou le -12 -20, - facteur correctif 8,31 pour windows)
 					//		de meme pour les Piege1
 					case 1:
-						listeTour.insertTete(new Tour1(ecran, e.getX()-12, e.getY()-20));
+						listeTour.insertTete(new Tour1(ecran, e.getX()-20, e.getY()-51));
 						listeTour.display();
 						bizuth.argent -= Tour1.PRIX;
-						menuTest.argent.setLabel("Argent : " + bizuth.argent + "$");
+						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 						menuTest.getInfoJeu().setText("Tour1 en position !");
 						break;
 					
 					case 2:
 						listeTour.insertTete(new Tour1(ecran, e.getX(), e.getY()));
 						bizuth.argent -= Tour1.PRIX;
-						menuTest.argent.setLabel("Argent : " + bizuth.argent + "$");
+						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 						menuTest.getInfoJeu().setText("Tour2 en position !");
 						break;
 					
 					case 3:
 						listeTour.insertTete(new Tour1(ecran, e.getX(), e.getY()));
 						bizuth.argent -= Tour1.PRIX;
-						menuTest.argent.setLabel("Argent : " + bizuth.argent + "$");
+						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 						menuTest.getInfoJeu().setText("Tour3 en position !");
 						break;
 					
 					case 4:
 						listeTour.insertTete(new Tour1(ecran, e.getX(), e.getY()));
 						bizuth.argent -= Tour1.PRIX;
-						menuTest.argent.setLabel("Argent : " + bizuth.argent + "$");
+						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 						menuTest.getInfoJeu().setText("Tour4 en position !");
 						break;
 					
 					case 5:
-						listeTour.insertTete(new Piege1(e.getX()-20, e.getY()-20));
-						bizuth.argent -= Piege1.PRIX;
-						menuTest.argent.setLabel("Argent : " + bizuth.argent + "$");
-						menuTest.getInfoJeu().setText("Piege1 en position !");
+						listeBarrieres.insertTete(new Barriere(e.getX()-33, e.getY()-43));
+						bizuth.argent -= Barriere.PRIX;
+						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+						menuTest.getInfoJeu().setText("Barriere en position !");
 						break;
 						
 					case 6:
 						listeTour.insertTete(new Piege1(e.getX(), e.getY()));
 						bizuth.argent -= Piege1.PRIX;
-						menuTest.argent.setLabel("Argent : " + bizuth.argent + "$");
+						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 						menuTest.getInfoJeu().setText("Piege2 en position !");
 						break;
 						
 					case 7:
 						listeTour.insertTete(new Piege1(e.getX(), e.getY()));
 						bizuth.argent -= Piege1.PRIX;
-						menuTest.argent.setLabel("Argent : " + bizuth.argent + "$");
+						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 						menuTest.getInfoJeu().setText("Piege3 en position !");
 						break;
 						
 					case 8:
 						listeTour.insertTete(new Piege1(e.getX(), e.getY()));
 						bizuth.argent -= Piege1.PRIX;
-						menuTest.argent.setLabel("Argent : " + bizuth.argent + "$");
+						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 						menuTest.getInfoJeu().setText("Piege4 en position !");
 						break;
 						
@@ -438,7 +455,7 @@ public class Fenetre extends JFrame{
 			listeEnnemis.suppr(e.getEnnemi());
 			if(listeEnnemis.root == null){
 				menuTest.infoJeu.setText("Place un truc !");
-				System.out.println("Bug d'affichage sur infoJeu, je suis bien passe par la");
+				System.out.println("infoJeu devrait afficher : 'Place un truc !'");
 			}
 		}
 		
@@ -446,12 +463,12 @@ public class Fenetre extends JFrame{
 			System.out.print("Un ennemi est victorieux ! ");
 			System.out.println(e.getEnnemi());
 			bizuth.setVie(1);
-			menuTest.vie.setLabel("PV : " + bizuth.vie);
+			menuTest.vie.setText("PV : " + bizuth.vie);
 			e.getEnnemi().removeEnnemiListener(this);
 			listeEnnemis.suppr(e.getEnnemi());
 			if(listeEnnemis.root == null){
 				menuTest.infoJeu.setText("Place un truc !");
-				System.out.println("Bug d'affichage sur infoJeu, je suis bien passe par la");
+				System.out.println("infoJeu devrait afficher : 'Place un truc !'");
 			}
 		}
 	}
@@ -467,27 +484,41 @@ public class Fenetre extends JFrame{
 	
 	/* Visualisation bordures */
 	private void showBordures(Graphics gb){
-		gb.setColor(Color.green);
 		Case curc = bordureBas.root;
 		while(curc != null){
+			gb.setColor(Color.green);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
 			curc.drawCase(gb);
 			curc = curc.next;
+			
+				
 		}
-		gb.setColor(Color.pink);
 		curc = bordureHaut.root;
 		while(curc != null){
+			gb.setColor(Color.pink);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
 			curc.drawCase(gb);
 			curc = curc.next;
 		}
-		gb.setColor(Color.orange);
 		curc = bordureGauche.root;
 		while(curc != null){
+			gb.setColor(Color.orange);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
 			curc.drawCase(gb);
 			curc = curc.next;
 		}
-		gb.setColor(Color.red);
 		curc = bordureDroite.root;
 		while(curc != null){
+			gb.setColor(Color.red);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
 			curc.drawCase(gb);
 			curc = curc.next;
 		}
@@ -503,13 +534,13 @@ public class Fenetre extends JFrame{
 	
 	/* Visualisation Arc2D portee des tours */
 	private void showPorteeTour(Graphics gb, Tour eiffel){
-		gb.setColor(Color.orange);
-		gb.fillArc(eiffel.getPosx()-(int)eiffel.portee.getWidth()/2 + eiffel.cadre.width/2, eiffel.getPosy()-(int)eiffel.portee.getHeight()/2+ eiffel.cadre.height/2, (int)eiffel.portee.getWidth(), (int)eiffel.portee.getHeight(), 0, 360);
+		gb.setColor(Color.red);
+		gb.drawArc(eiffel.getPosx()-(int)eiffel.portee.getWidth()/2 + eiffel.cadre.width/2, eiffel.getPosy()-(int)eiffel.portee.getHeight()/2+ eiffel.cadre.height/2, (int)eiffel.portee.getWidth(), (int)eiffel.portee.getHeight(), 0, 360);
 	}
     
     /* Spawn de quelques Ennemis dans le chemin pour voir leurs deplacements */
     private void spawnTest(){
-		bob = new Sbire1(ecran, 550, 650, 0);
+		Sbire1 bob = new Sbire1(ecran, 550, 650, 0);
         listeEnnemis.insertTete(bob);
         bob.addEnnemiListener(new EcouteurEnnemi());
         for(int i = 1; i < 10; i++){
@@ -523,6 +554,25 @@ public class Fenetre extends JFrame{
 			}
 			sbire.addEnnemiListener(new EcouteurEnnemi());
 			listeEnnemis.insertTete(sbire);
+		}
+	}
+	
+	/* Test de la bonne collision sur une barriere, verification du bon placement des objets */
+	private void testCollisionBarrieres(){
+		Element curB = listeBarrieres.root;
+		while(curB != null){
+			Ennemis curE = listeEnnemis.root;
+			while(curE != null){
+				if(curB.collision(curE)){
+					timer.stop();
+				}
+				if(curE != null){
+					curE = curE.next;
+				}
+			}
+			if(curB != null){
+				curB = curB.next;
+			}
 		}
 	}
 }

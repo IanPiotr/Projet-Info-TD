@@ -16,6 +16,7 @@ public abstract class Element {
 	protected int posx;
 	protected int posy;
 	protected Rectangle cadre;
+	public Element next;
 	
 	public Element(){
 		
