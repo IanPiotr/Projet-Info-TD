@@ -1,11 +1,11 @@
 A faire : 
 
--implanter les différentes tours (avec leur méthode de tir!)
+-implanter les différentes tours (avec leur méthode de tir)
 -implanter les différents pièges
 -implanter les différents ennemis
 -gestion barrière (bloque les ennemis et ne bloque pas le chemin, collision)
 -placer les objets dans les cases (impossible dans les cases occupées, seulement dans les vides)
 -gestion des niveaux (spawn avec matrice?)
--implanter les exceptions quand il y a une seule case qui coupe le chemin)
+-implanter les exceptions quand il y a une seule case qui coupe le chemin
 -implanter de la musique (détail)
 -bouton pause/start (bloquer les timers)
