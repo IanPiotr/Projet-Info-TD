@@ -15,7 +15,7 @@ import javax.swing.event.EventListenerList;
 import java.awt.Color;
 
 
-public abstract class Ennemis extends Element{
+public class Ennemis extends Element{
 
 	public int IDEnnemi;
 	protected int vie;
@@ -28,29 +28,55 @@ public abstract class Ennemis extends Element{
 	public Ennemis next;
 	protected boolean enBas;
 	protected int buteeBas;
+	public static final String nomImage1 = "Sbire1.png";
+	public static final String nomImage2 = "Sbire2.png";
+	public static final String nomImage3 = "Sbire3.png";
+	public int upgrade;
 	
-	public Ennemis(Rectangle fenetre, String nomImage, int px, int py, int hp, int vit){
+	public Ennemis(){
 		super();
-		
 		next = null;
+		enBas = false;
+		dposx = 0;
+		dposy = 1;
+		vitesse = 2;
+	}
+
+	public Ennemis(Rectangle fenetre, int upRef, int num, int px, int py, int hp){
+		this();
 		
+        IDEnnemi = num;
+        
+        posx = px;
+        posy = py;
+
+		vie = hp;
+		
+		upgrade = upRef;
+		
+		String nomImage;
+		switch(upgrade){
+			case 4 :
+				nomImage = SbireFantome.nomFantome;
+				break;
+			case 3 :
+				nomImage = nomImage3;
+				break;
+			case 2 :
+				nomImage = nomImage2;
+				break;
+			default :
+				nomImage = nomImage1;
+		}
 		try {
-			image= ImageIO.read(new File(nomImage));
+			image = ImageIO.read(new File(nomImage));
         } catch(Exception err){
 			System.out.println(nomImage+" introuvable !");            
             System.exit(0);    
         }
         
-        posx = px;
-        posy = py;
-		dposx = 0;
-		dposy = 1;
-		vitesse = vit;
-		vie = hp;
-		
 		limEcran = fenetre;	//meme pointeur, c'est ce qu'il me faut
 		buteeBas = limEcran.height;
-		enBas = false;
 		
 		largeur = image.getWidth(null);
 		hauteur = image.getHeight(null);
@@ -59,6 +85,7 @@ public abstract class Ennemis extends Element{
 		cercle = new Arc2D.Double(cadre, 0, 360, Arc2D.OPEN);
 
 	}
+	
 	/* REDEFINITION SETTERS ELEMENT
 	 * On met de plus a jour la position de l'ellipse
 	 */
@@ -159,23 +186,9 @@ public abstract class Ennemis extends Element{
 	public void moveBasique(boolean horizon, boolean vert){
         if(horizon){
 			setPosx(posx + (int)(vitesse*dposx));
-			/*if(posx < limEcran.x){
-				posx = limEcran.x;
-				dposx = -dposx;
-			} else if(posx + largeur > limEcran.x + limEcran.width){
-				setPosx(limEcran.x + limEcran.width-largeur);
-				dposx = -dposx;
-			}*/
 		}
 		if(vert){
 			setPosy(posy + (int)(vitesse*dposy));
-			/*if(posy < limEcran.y){
-				posy = limEcran.y;
-				dposy = -dposy;
-			} else if(posy + hauteur > limEcran.y + limEcran.height){
-				setPosy(limEcran.y + limEcran.height-hauteur);
-				dposy = -dposy;
-			}*/
 		}
 	}
 	//*//
@@ -368,24 +381,32 @@ public abstract class Ennemis extends Element{
 	 * Les ennemis doivent donc toujours essayer de descendre (dposy = 1) sauf si rebond
 	 * Pas de rebonds sur une case hybride, puisqu'on sait qu'on va pouvoir descendre sous peu
 	 */
-	public void moveChemin(Case[][] tabCases, ListeCases lg, ListeCases ld, ListeCases lh, ListeCases lb){
+	public void moveChemin(Case[][] tabCases, ListeCases lg, ListeCases ld, ListeCases lh, ListeCases lb/*, ListeElement lbar*/){
 		 	//Nouvelle potentielle position
 		setPos(posx + (int)(vitesse*dposx), posy + (int)(dposy*vitesse));
 		
-			//Verification colision sur les murs
+			//VERIFICATION COLLISIONS MURS
 		Case cur;
 				//Mur de GAUCHE
 		cur = lg.root;
 		while(cur != null){
-			if(cur.intersects(cadre)){
+			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
 			//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
 				//Cas de la case bordure GAUCHE et BAS, s'il a en fait tape en BAS
 				if(cur.hybride && cadre.y + cadre.height <= cur.y + 4){ //Ce 4 (bug constate avec 3) représente la penetration possible du sbire dans la case bordure
 					setPosy(cur.y - cadre.height);						//Fonction de la vitesse du sbire et de son angle d'approche => cas le plus emmerdant a prendre, la diago
 					buteeBas = cur.y;
 					if(!enBas){
+						int j = (int)((posy + hauteur)/Case.LCASE);
+						int imax = (int)(posx/Case.LCASE);
+						dposx = 1;
+						for(int i = 0 ; i <= imax ; i++){
+							if(tabCases[i][j].isChemin()){
+								dposx = -1;
+								break;
+							}
+						}
 						enBas = true;
-						dposx = 1; //On sait alors qu'on doit aller vers la droite
 					}
 				//Sinon cas general
 				} else {
@@ -403,15 +424,23 @@ public abstract class Ennemis extends Element{
 				//puisque les ennemis ne peuvent que descendre
 		cur = ld.root;
 		while(cur != null){
-			if(cur.intersects(cadre)){
+			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
 			//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
 				//Cas de la case DROITE et BAS, s'il a en fait tape en BAS
 				if(cur.hybride && cadre.y + cadre.height <= cur.y + 4){
 					setPosy(cur.y - cadre.height);
 					buteeBas = cur.y;
 					if(!enBas){
+						int j = (int)((posy + hauteur)/Case.LCASE);
+						int imax = (int)(posx/Case.LCASE);
+						dposx = 1;
+						for(int i = 0 ; i <= imax ; i++){
+							if(tabCases[i][j].isChemin()){
+								dposx = -1;
+								break;
+							}
+						}
 						enBas = true;
-						dposx = -1; //On sait alors qu'on doit aller vers la gauche
 					}
 				//Sinon cas normal
 				} else {
@@ -427,15 +456,13 @@ public abstract class Ennemis extends Element{
 				//Mur du BAS
 		cur = lb.root;
 		while(cur != null){
-			if(cur.intersects(cadre)){
+			if(cur.intersects(cadre) && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
 				buteeBas = cur.y;
 				setPosy(cur.y - cadre.height);
 				//Si on vient de taper en bas, on regarde de quel cote on doit partir
 				if(!enBas){
 					int j = (int)((posy + hauteur)/Case.LCASE);
 					int imax = (int)(posx/Case.LCASE);
-					/*System.out.println(imax);
-					System.out.println(j);*/
 					dposx = 1;
 					for(int i = 0 ; i <= imax ; i++){
 						if(tabCases[i][j].isChemin()){
@@ -453,7 +480,7 @@ public abstract class Ennemis extends Element{
 				//Sauf si rebonds
 		cur = lh.root;
 		while(cur != null){
-			if(cur.intersects(cadre)){
+			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
 				setPosy(cur.y + cur.height);
 				dposy = 1;
 				System.out.println("YOLO");
@@ -470,7 +497,7 @@ public abstract class Ennemis extends Element{
 		if(posy > limEcran.y + limEcran.height){
 			fireEnnemiVictorieux(this);
 		}
-	 
+		
 	}
 	//*//
 	

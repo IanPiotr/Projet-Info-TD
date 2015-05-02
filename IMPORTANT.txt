@@ -1,11 +1,31 @@
-A faire : 
+﻿A faire : 
 
--implanter les différentes tours (avec leur méthode de tir)
+-implanter l'intoduction
+(contexte, but, commandes)
+
+-implanter les différentes tours
+(avec leur méthode de tir)
+
 -implanter les différents pièges
--implanter les différents ennemis
--gestion barrière (bloque les ennemis et ne bloque pas le chemin, collision)
--placer les objets dans les cases (impossible dans les cases occupées, seulement dans les vides)
--gestion des niveaux (spawn avec matrice?)
+(fait toi plaisir alois)
+
+-implanter les différents ennemis 	DONE
+
+-gestion des niveaux	DONE (vous m'en direz des nouvelles)
+(spawn avec matrice)
+
+-gestion barrière :
+Collision		DONE
+Placement correct	(le stict minimum DONE, ce n'est pas mon job)
+
+-infos-bulles et pop-up		exemple DONE : bouton Barriere et niveau 3 & 7 (a vous de faire le reste)
+
+-placer les objets dans les cases
+(impossible dans les cases occupées, seulement dans les vides)
+
 -implanter les exceptions quand il y a une seule case qui coupe le chemin
--implanter de la musique (détail)
--bouton pause/start (bloquer les timers)
+
+-implanter de la musique
+
+-bouton pause/start
+(bloquer les timers)

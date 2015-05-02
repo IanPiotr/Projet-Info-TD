@@ -30,6 +30,7 @@ public class Menu extends JLayeredPane {
 	protected JLabel infoJeu; // permet de donner des infos au joueur
 	private static final ImageIcon iconTour1 = new ImageIcon("Tour1.png");
 	private static final ImageIcon iconPiege1 = new ImageIcon("Piege1.png");
+	private static final ImageIcon iconBarriere = new ImageIcon("Barriere.png");
 	private static final ImageIcon iconVie = new ImageIcon("coeur.png");
 	private static final ImageIcon iconStart = new ImageIcon("start.png");
 	private static final ImageIcon iconArgent = new ImageIcon("lingot.png");
@@ -40,10 +41,9 @@ public class Menu extends JLayeredPane {
 	
 	public Menu(Joueur gameur){
 		super();
+		ToolTipManager.sharedInstance().setDismissDelay(10000);
 		setPreferredSize(new Dimension(285, 740));
 		setDoubleBuffered(true);
-		/*setMinimumSize(new Dimension(285, 740));
-		setMaximumSize(new Dimension(285, 740));*/
 		
 		MonSousMenuTour = new JPanel();
 		MonSousMenuTour.setLayout(new GridLayout(4,2));
@@ -64,7 +64,14 @@ public class Menu extends JLayeredPane {
 		}
 		
 		MesPieges = new JButton[4];
-		for(int i = 0; i< MesPieges.length; i++){
+		MesPieges[0] = new JButton("Barriere", iconBarriere);
+			MonSousMenuTour.add(MesPieges[0]);
+			MesPieges[0].addActionListener(new BDefense());
+			MesPieges[0].setToolTipText("<html>Une barriere que les ennemis ne peuvent pas traverser vivants.<br/>" +
+										"Ne peut etre placee que sur un bord droit ou gauche du chemin,<br/>" +
+										"ou a la suite d'une autre barriere.<br/>" +
+										"Ne peut pas obstruer totalement le chemin.</html>");
+		for(int i = 1; i< MesPieges.length; i++){
 			int a = i+1;
 			MesPieges[i] = new JButton("Piege " +a, iconPiege1);
 			MonSousMenuTour.add(MesPieges[i]);
@@ -152,7 +159,7 @@ public class Menu extends JLayeredPane {
 				} else {
 					infoJeu.setText("Tu n'as pas assez d'argent !");
 				}
-			} else if(nomButton.equals("Piege 1")){
+			} else if(nomButton.equals("Barriere")){
 				if(bizuth.argent >= Piege1.PRIX){
 					setVariable(5);
 					infoJeu.setText("Choisis la position de ton piege !");
@@ -194,9 +201,7 @@ public class Menu extends JLayeredPane {
 	
 	public static void main (String args[]) {
 		Fenetre test = new Fenetre();
-		//Menu menuTest = new Menu(Bizuth, test);
-		//test.getContentPane().add(MenuTest);
-		// test.menuTest.update(test.getGraphics());
+
 
 	}
 

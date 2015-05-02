@@ -16,7 +16,7 @@ public class Barriere extends Element{
 	public static final int PRIX = 200;
 	//protected Barriere next;
 
-	public Barriere(int px, int py){
+	public Barriere(int px, int py, Case[][] tabCases){
 		super();
 		
 		try {
@@ -25,8 +25,24 @@ public class Barriere extends Element{
 			System.out.println(nomImage+" introuvable !");            
             System.exit(0);    
         }
+        /*px += 25;
+        py += 12;
+        
+        int x = (int)((px + hauteur)/Case.LCASE);;
+        int y = (int)((py + hauteur)/Case.LCASE);
+        posx = x*Case.LCASE + 5;
+        posy = y*Case.LCASE + 3;*/
         posx = px;
         posy = py;
+        int j = (int)((posy + hauteur)/Case.LCASE);
+		int i = (int)(posx/Case.LCASE);
+		for(int c = i ; c <= i+1 ; c++){
+			tabCases[c][j].setChemin(false);
+			tabCases[c][j].setBarriere(true);
+		}
+		GeneAleat.genererBordures(tabCases);
+			
+		
         		
 		next = null;
 		
