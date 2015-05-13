@@ -22,6 +22,12 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 
+		/* BOGS CONNUS
+			 * Probleme de timer lorsqu'on lance un niveau avant la vraie fin du precedent
+			 * Barrieres peuvent obstruer la totalite du chemin
+			 * Pas de remise a jour des graphismes avant l'apparition des pop-ups (peut-etre pas plus mal...)
+		*/
+
 public class Fenetre extends JFrame{
 
 	//private static final long serialVersionUID = 43L; 
@@ -35,13 +41,12 @@ public class Fenetre extends JFrame{
     protected Menu menuTest;
     protected Joueur bizuth;
     private Case[][] tabCases;
-    /*private ListeCases bordureDroite;
-    private ListeCases bordureGauche;
-    private ListeCases bordureHaut;
-    private ListeCases bordureBas;*/
     private Niveau level;
     private int niveau;
     private int nbSpawn;
+    private boolean enCours;
+    private boolean niveauReady;
+    //private boolean pauseDemandee;
 
 	public Fenetre() {
         /* INIT FRAME */
@@ -74,13 +79,18 @@ public class Fenetre extends JFrame{
 		
         /* INIT TIMERS */
         timer = new Timer(15, new letsDance());
+        timer.start();
         spawn = new Timer(600, new letsSpawn());
+        //spawn.setInitialDelay(600);
         
         /* INIT NIVEAU */
         niveau = 0;
-        nbSpawn = 0;
+        nbSpawn = -1;
 		level = new Niveau(niveau, 15*Case.LCASE, 19*Case.LCASE);
-       
+		enCours = false;
+		niveauReady = true;
+		//pauseDemandee = false;
+		
         /* INIT QUADRILAGE DE LA CARTE
          * Uniquement sur la zone jouable
          * Chemin predefini pour le moment
@@ -125,6 +135,7 @@ public class Fenetre extends JFrame{
 				tabCases[i][j].drawCase(gb);
 			}
 		}
+		//showBordures(gb);
 		/* PEINTURE TOURS */
 		Tour cur2 = listeTour.root;
 		while(cur2 != null){
@@ -149,7 +160,7 @@ public class Fenetre extends JFrame{
 		}
 		
 		/* DESSIN GLOBAL */
-        g.drawImage(monBuf,8,31,null);
+        g.drawImage(monBuf,0,39,null); //8,31 sur windows
         
     }
     
@@ -163,27 +174,36 @@ public class Fenetre extends JFrame{
 	/* CALCULS DEROULEMENT NIVEAU */
 	public class letsSpawn implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			if(nbSpawn == 0){
-				niveau++;
-				level = new Niveau(niveau, 14*Case.LCASE, 19*Case.LCASE);
-				menuTest.infoJeu.setText("Le niveau " + niveau + " a commence !");
-			}
-			Ennemis sbire = level.genererEnnemi(nbSpawn, ecran);
-			sbire.addEnnemiListener(new EcouteurEnnemi());
-			listeEnnemis.insertQueue(sbire);
-			if(nbSpawn == level.matriceC[0].length -1){
+			//if(!pauseDemandee){
+				if(niveauReady && listeEnnemis.root == null){
+					niveau++;
+					level = new Niveau(niveau, 14*Case.LCASE, 19*Case.LCASE);
+					menuTest.infoJeu.setText("Le niveau " + niveau + " a commence !");
+					menuTest.MajMenu(niveau);
+					nbSpawn++;
+					niveauReady = false;
+				}
+				if(nbSpawn != -1){
+					Ennemis sbire = level.genererEnnemi(nbSpawn, ecran);
+					sbire.addEnnemiListener(new EcouteurEnnemi());
+					listeEnnemis.insertQueue(sbire);
+				}
+				if(nbSpawn == level.matriceC[0].length -1){
+					spawn.stop();
+					nbSpawn = -1;
+				} else if(nbSpawn != -1) nbSpawn++;
+			/*} else {
+				pauseDemandee = false;
 				spawn.stop();
-				nbSpawn = 0;
-			} else {
-				nbSpawn++;
-			}
+			}*/
+			
 		}
 	}
 	
 	public void boucle() {
 		Ennemis cur = listeEnnemis.root;
 		while(cur != null){
-			cur.moveChemin(tabCases, GeneAleat.bordureGauche, GeneAleat.bordureDroite, GeneAleat.bordureHaut, GeneAleat.bordureBas/*, listeBarrieres*/);
+			cur.moveChemin(tabCases, GeneAleat.bordureGauche, GeneAleat.bordureDroite, GeneAleat.bordureHaut, GeneAleat.bordureBas);
 			cur = cur.next;
 		}
 		
@@ -383,9 +403,17 @@ public class Fenetre extends JFrame{
 	
 	public class EcouteurBoutonStart implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			if(((JButton)(e.getSource())).getText().equals(" ")){
+			if(((JButton)(e.getSource())).getText().equals(" ") && !enCours){
 				timer.start();
 				spawn.start();
+				enCours = true;
+				menuTest.MajVersPause();
+			} else if(((JButton)(e.getSource())).getText().equals(" ") && enCours){
+				timer.stop();
+				spawn.stop();
+				//pauseDemandee = true;
+				enCours = false;
+				menuTest.MajVersStart();
 			}
 		}
 	}
@@ -399,7 +427,7 @@ public class Fenetre extends JFrame{
 			if(e.getEnnemi().upgrade == 3 && (int)(2*Math.random()) == 1){
 				SbireFantome sbireFantome = new SbireFantome(ecran, e.getEnnemi().IDEnnemi, e.getEnnemi().posx, e.getEnnemi().posy);
 				sbireFantome.addEnnemiListener(new EcouteurEnnemi());
-				listeEnnemis.insertQueue(sbireFantome);
+				listeEnnemis.insertFantome(sbireFantome); //De cette maniere, les tours tirent en priorite sur les fantomes les plus vieux
 			}				
 			e.getEnnemi().removeEnnemiListener(this);
 			listeEnnemis.suppr(e.getEnnemi());
@@ -420,6 +448,9 @@ public class Fenetre extends JFrame{
 			if(listeEnnemis.root == null){
 				menuTest.infoJeu.setText("Fin du niveau " + niveau + " !");
 				System.out.println("infoJeu devrait afficher : 'Fin du niveau " + niveau + " !'");
+				enCours = false;
+				niveauReady = true;
+				spawn.stop();
 				if(niveau == 2){
 					JOptionPane level3 = new JOptionPane();
 					level3.showMessageDialog(null, "Felicitations, tu as servecu aux deux premieres vagues !",
@@ -463,9 +494,7 @@ public class Fenetre extends JFrame{
 				gb.setColor(Color.blue);
 			}
 			curc.drawCase(gb);
-			curc = curc.next;
-			
-				
+			curc = curc.next;				
 		}
 		curc = GeneAleat.bordureHaut.root;
 		while(curc != null){
