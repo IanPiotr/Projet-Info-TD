@@ -24,7 +24,7 @@ public class Menu extends JLayeredPane {
 	private JButton [] MesTours;
 	private JButton [] MesPieges;
 	private JButton start;
-	private JButton nom;
+	private JButton niveau;
 	protected JButton argent;
 	protected JButton vie;
 	protected JLabel infoJeu; // permet de donner des infos au joueur
@@ -33,8 +33,9 @@ public class Menu extends JLayeredPane {
 	private static final ImageIcon iconBarriere = new ImageIcon("Barriere.png");
 	private static final ImageIcon iconVie = new ImageIcon("coeur.png");
 	private static final ImageIcon iconStart = new ImageIcon("start.png");
+	private static final ImageIcon iconPause = new ImageIcon("pause.png");
 	private static final ImageIcon iconArgent = new ImageIcon("lingot.png");
-	private static final ImageIcon iconUser = new ImageIcon("user.png");
+	private static final ImageIcon iconNiveau = new ImageIcon("niveau.png");
 	private int variable = 0; //permet de savoir quelle tour ou piège va etre pose (1 = tour1 ... 4 = piege1 ..)
 	private Joueur bizuth;
 	
@@ -78,10 +79,10 @@ public class Menu extends JLayeredPane {
 			MesPieges[i].addActionListener(new BDefense());
 		}
 		
-		nom = new JButton("Nom : " + gameur.name, iconUser);
+		niveau = new JButton("Niveau : " + 0, iconNiveau);
 		vie = new JButton(" PV : " + gameur.vie, iconVie);
 		argent = new JButton("Argent : " + gameur.argent + "$", iconArgent);
-		MonSousMenuJoueur.add(nom);
+		MonSousMenuJoueur.add(niveau);
 		MonSousMenuJoueur.add(vie);
 		MonSousMenuJoueur.add(argent);
 		
@@ -124,6 +125,19 @@ public class Menu extends JLayeredPane {
 	
 	public JButton getStart(){
 		return start;
+	}
+	
+	public void MajMenu(int niv){
+		infoJeu.setText("Le niveau " + niv + " a commence !");
+		niveau.setText("Niveau : " + niv);
+	}
+	
+	public void MajVersPause(){ 
+		start.setIcon(iconPause);
+	}
+	
+	public void MajVersStart(){
+		start.setIcon(iconStart);
 	}
 	
 	public class BDefense implements ActionListener{
