@@ -16,6 +16,7 @@ public abstract class Element {
 	protected int posx;
 	protected int posy;
 	protected Rectangle cadre;
+	public Element next;
 	
 	public Element(){
 		
@@ -52,9 +53,5 @@ public abstract class Element {
 	public boolean collision(Element elem){
 		return this.cadre.intersects(elem.cadre);
 	}
-	
-	/*public abstract void moveAleatoire();
-	public abstract void moveBasique(boolean h, boolean v);
-	public abstract void moveBrownien();*/
-	
+
 }

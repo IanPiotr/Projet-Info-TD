@@ -12,8 +12,12 @@ import javax.imageio.ImageIO;
 
 import javax.swing.event.EventListenerList;
 
-public abstract class Ennemis extends Element{
+import java.awt.Color;
 
+
+public class Ennemis extends Element{
+
+	public int IDEnnemi;
 	protected int vie;
 	protected int vitesse;
 	public double dposx;
@@ -21,28 +25,58 @@ public abstract class Ennemis extends Element{
 	protected Arc2D.Double cercle;
 	protected Rectangle limEcran;
 	private final EventListenerList listeners = new EventListenerList();
-	public int IDEnnemi;
 	public Ennemis next;
+	protected boolean enBas;
+	protected int buteeBas;
+	public static final String nomImage1 = "Sbire1.png";
+	public static final String nomImage2 = "Sbire2.png";
+	public static final String nomImage3 = "Sbire3.png";
+	public int upgrade;
 	
-	public Ennemis(String nomImage, int px, int py, int hp, int vit){
+	public Ennemis(){
 		super();
-		
 		next = null;
+		enBas = false;
+		dposx = 0;
+		dposy = 1;
+		vitesse = 2;
+	}
+
+	public Ennemis(Rectangle fenetre, int upRef, int num, int px, int py, int hp){
+		this();
 		
+        IDEnnemi = num;
+        
+        posx = px;
+        posy = py;
+
+		vie = hp;
+		
+		upgrade = upRef;
+		
+		String nomImage;
+		switch(upgrade){
+			case 4 :
+				nomImage = SbireFantome.nomFantome;
+				break;
+			case 3 :
+				nomImage = nomImage3;
+				break;
+			case 2 :
+				nomImage = nomImage2;
+				break;
+			default :
+				nomImage = nomImage1;
+		}
 		try {
-			image= ImageIO.read(new File(nomImage));
+			image = ImageIO.read(new File(nomImage));
         } catch(Exception err){
 			System.out.println(nomImage+" introuvable !");            
             System.exit(0);    
         }
         
-        posx = px;
-        posy = py;
-		dposx = 0;
-		dposy = 1;
-		vitesse = vit;
-		
-		vie = hp;
+		limEcran = fenetre;	//meme pointeur, c'est ce qu'il me faut
+		buteeBas = limEcran.height;
 		
 		largeur = image.getWidth(null);
 		hauteur = image.getHeight(null);
@@ -51,6 +85,7 @@ public abstract class Ennemis extends Element{
 		cercle = new Arc2D.Double(cadre, 0, 360, Arc2D.OPEN);
 
 	}
+	
 	/* REDEFINITION SETTERS ELEMENT
 	 * On met de plus a jour la position de l'ellipse
 	 */
@@ -100,8 +135,8 @@ public abstract class Ennemis extends Element{
 	
 	//*//
 	
-	/* METHODES D'ECOUTE DE LA MORT D'UN ENNEMI
-	 * Pour utiliser un ecouteur mortListener de mort d'un ennemi
+	/* METHODES D'ECOUTE D'UN ENNEMI
+	 * Pour utiliser un ecouteur EnnemiListener d'un ennemi
 	 */
 	 
 	public void addEnnemiListener(EnnemiListener el){
@@ -151,23 +186,9 @@ public abstract class Ennemis extends Element{
 	public void moveBasique(boolean horizon, boolean vert){
         if(horizon){
 			setPosx(posx + (int)(vitesse*dposx));
-			if(posx < limEcran.x){
-				posx = limEcran.x;
-				dposx = -dposx;
-			} else if(posx + largeur > limEcran.x + limEcran.width){
-				setPosx(limEcran.x + limEcran.width-largeur);
-				dposx = -dposx;
-			}
 		}
 		if(vert){
 			setPosy(posy + (int)(vitesse*dposy));
-			if(posy < limEcran.y){
-				posy = limEcran.y;
-				dposy = -dposy;
-			} else if(posy + hauteur > limEcran.y + limEcran.height){
-				setPosy(limEcran.y + limEcran.height-hauteur);
-				dposy = -dposy;
-			}
 		}
 	}
 	//*//
@@ -356,90 +377,129 @@ public abstract class Ennemis extends Element{
 	 * Mouvements visant a faire traverser la carte aux ennemis,
 	 * "le plus vite possible"
 	 * (ceci sera toujours ameliorable)
+	 * Le chemin doit toujours DESCENDRE et non remonter
+	 * Les ennemis doivent donc toujours essayer de descendre (dposy = 1) sauf si rebond
+	 * Pas de rebonds sur une case hybride, puisqu'on sait qu'on va pouvoir descendre sous peu
 	 */
-	public void moveChemin(ListeCases lg, ListeCases ld, ListeCases lh, ListeCases lb){
+	public void moveChemin(Case[][] tabCases, ListeCases lg, ListeCases ld, ListeCases lh, ListeCases lb/*, ListeElement lbar*/){
 		 	//Nouvelle potentielle position
 		setPos(posx + (int)(vitesse*dposx), posy + (int)(dposy*vitesse));
 		
-			//Verification colision sur les murs
+			//VERIFICATION COLLISIONS MURS
 		Case cur;
 				//Mur de GAUCHE
 		cur = lg.root;
 		while(cur != null){
-			if(cur.intersects(cadre)){
-				//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
-				if(cur.hybride){
-					//Cas de la case bordure GAUCHE et BAS, s'il a en fait tape en bas
-					if(cadre.y + cadre.height <= cur.y + 4){	//Ce 4 représente la penetration possible du sbire dans la case bordure
-						setPosy(cur.y - cadre.height);			//Fonction de la vitesse du sbire et de son angle d'approche => cas le plus emmerdant a prendre, la diago
-						//dposy = 0;								//Un bug constate avec 3
+			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
+			//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
+				//Cas de la case bordure GAUCHE et BAS, s'il a en fait tape en BAS
+				if(cur.hybride && cadre.y + cadre.height <= cur.y + 4){ //Ce 4 (bug constate avec 3) représente la penetration possible du sbire dans la case bordure
+					setPosy(cur.y - cadre.height);						//Fonction de la vitesse du sbire et de son angle d'approche => cas le plus emmerdant a prendre, la diago
+					buteeBas = cur.y;
+					if(!enBas){
+						int j = (int)((posy + hauteur)/Case.LCASE);
+						int imax = (int)(posx/Case.LCASE);
 						dposx = 1;
-					} else { //Sinon cas normal
-						setPosx(cur.x + cur.width);
-						//dposx = -dposx;
+						for(int i = 0 ; i <= imax ; i++){
+							if(tabCases[i][j].isChemin()){
+								dposx = -1;
+								break;
+							}
+						}
+						enBas = true;
 					}
+				//Sinon cas general
 				} else {
 					setPosx(cur.x + cur.width);
-					//dposx = -dposx;
+					if(!cur.hybride){	//Pour eviter un rebond inutil lorsque case hybride g/h
+						dposx = 1;
+					}
 				}
 			}
 			cur = cur.next;
 		}
 				//Mur de DROITE
+				//Un bug certain tel quel si les ennemis tapent une hybride d/h en haut,
+				//mais si le chemin ne fait que descendre ce cas ne se presentera pas,
+				//puisque les ennemis ne peuvent que descendre
 		cur = ld.root;
 		while(cur != null){
-			if(cur.intersects(cadre)){
-				//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
-				if(cur.hybride){
-					//Cas de la case bordure DROITE et HAUT
-					if(cadre.y >= cur.y + cur.height - 4){
-						setPosy(cur.y + cur.height);
-						dposy = 1;
-						//Sinon cas normal
-					} else {
-						setPosx(cur.x - cadre.width);
-						//dposx = 0;
-						dposy = 1;
+			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
+			//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
+				//Cas de la case DROITE et BAS, s'il a en fait tape en BAS
+				if(cur.hybride && cadre.y + cadre.height <= cur.y + 4){
+					setPosy(cur.y - cadre.height);
+					buteeBas = cur.y;
+					if(!enBas){
+						int j = (int)((posy + hauteur)/Case.LCASE);
+						int imax = (int)(posx/Case.LCASE);
+						dposx = 1;
+						for(int i = 0 ; i <= imax ; i++){
+							if(tabCases[i][j].isChemin()){
+								dposx = -1;
+								break;
+							}
+						}
+						enBas = true;
 					}
+				//Sinon cas normal
 				} else {
 					setPosx(cur.x - cadre.width);
-					//dposx = 0;
-					dposy = 1;
+					//Pour eviter un rebond inutil lorsque case hybride d/h
+					if(!cur.hybride){
+						dposx = -1;
+					}
 				}
-			}
-			cur = cur.next;
-		}
-				//Mur du HAUT
-		cur = lh.root;
-		while(cur != null){
-			if(cur.intersects(cadre)){
-				setPosy(cur.y + cur.height);
-				dposx = 1;
 			}
 			cur = cur.next;
 		}
 				//Mur du BAS
 		cur = lb.root;
 		while(cur != null){
-			if(cur.intersects(cadre)){
+			if(cur.intersects(cadre) && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
+				buteeBas = cur.y;
 				setPosy(cur.y - cadre.height);
-				dposx = 1;
+				//Si on vient de taper en bas, on regarde de quel cote on doit partir
+				if(!enBas){
+					int j = (int)((posy + hauteur)/Case.LCASE);
+					int imax = (int)(posx/Case.LCASE);
+					dposx = 1;
+					for(int i = 0 ; i <= imax ; i++){
+						if(tabCases[i][j].isChemin()){
+							dposx = -1;
+							break;
+						}
+					}
+					enBas = true;
+				}
 			}
 			cur = cur.next;
+		}
+				//Mur du HAUT
+				//Ne devrait pas se presenter si on n'a qu'un chemin qui descend
+				//Sauf si rebonds
+		cur = lh.root;
+		while(cur != null){
+			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
+				setPosy(cur.y + cur.height);
+				dposy = 1;
+				System.out.println("YOLO");
+			}
+			cur = cur.next;
+		}
+
+			//Pour etre pret a rencontrer de nouveau une bordure de bas
+		if(enBas && posy + hauteur > buteeBas){
+			enBas = false;
 		}
 		
 			//Si chemin au bord inferieur de l'ecran
 		if(posy > limEcran.y + limEcran.height){
 			fireEnnemiVictorieux(this);
 		}
-	 
+		
 	}
 	//*//
-	 
-	 public void stop(){
-		 dposx = 0;
-		 dposy = 0;
-	 }
 	
 	/* METHODE MOUVEMENTS BROWNIEN ENNEMIS
 	 * Mouvement aleatoire type brownien
@@ -489,10 +549,12 @@ public abstract class Ennemis extends Element{
 	 * On regarde l'intersection de l'ellispe et du rectangle
 	 * Plutot que celle de deux rectangles
 	 * (Pas de methode Arc2D.intersects(Arc2D) existante)
+	 * Plus coherent EN THEORIE mais moins bel affichage en pratique
+	 * Il faudrait faire l'intersection de deux cercles plutot
 	 */
-	public boolean collision(Element elem){
+	/*public boolean collision(Element elem){
 		return this.cercle.intersects(elem.cadre);
-	}
+	}*/
 	//*//
 	
 	public String toString(){

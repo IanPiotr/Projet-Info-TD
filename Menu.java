@@ -24,26 +24,27 @@ public class Menu extends JLayeredPane {
 	private JButton [] MesTours;
 	private JButton [] MesPieges;
 	private JButton start;
-	private JButton nom;
+	private JButton niveau;
 	protected JButton argent;
 	protected JButton vie;
 	protected JLabel infoJeu; // permet de donner des infos au joueur
 	private static final ImageIcon iconTour1 = new ImageIcon("Tour1.png");
 	private static final ImageIcon iconPiege1 = new ImageIcon("Piege1.png");
+	private static final ImageIcon iconBarriere = new ImageIcon("Barriere.png");
 	private static final ImageIcon iconVie = new ImageIcon("coeur.png");
 	private static final ImageIcon iconStart = new ImageIcon("start.png");
+	private static final ImageIcon iconPause = new ImageIcon("pause.png");
 	private static final ImageIcon iconArgent = new ImageIcon("lingot.png");
-	private static final ImageIcon iconUser = new ImageIcon("user.png");
+	private static final ImageIcon iconNiveau = new ImageIcon("niveau.png");
 	private int variable = 0; //permet de savoir quelle tour ou piège va etre pose (1 = tour1 ... 4 = piege1 ..)
 	private Joueur bizuth;
 	
 	
-	public Menu(Joueur gameur, Fenetre fenetreJeu){
+	public Menu(Joueur gameur){
 		super();
+		ToolTipManager.sharedInstance().setDismissDelay(10000);
 		setPreferredSize(new Dimension(285, 740));
 		setDoubleBuffered(true);
-		/*setMinimumSize(new Dimension(285, 740));
-		setMaximumSize(new Dimension(285, 740));*/
 		
 		MonSousMenuTour = new JPanel();
 		MonSousMenuTour.setLayout(new GridLayout(4,2));
@@ -64,17 +65,24 @@ public class Menu extends JLayeredPane {
 		}
 		
 		MesPieges = new JButton[4];
-		for(int i = 0; i< MesPieges.length; i++){
+		MesPieges[0] = new JButton("Barriere", iconBarriere);
+			MonSousMenuTour.add(MesPieges[0]);
+			MesPieges[0].addActionListener(new BDefense());
+			MesPieges[0].setToolTipText("<html>Une barriere que les ennemis ne peuvent pas traverser vivants.<br/>" +
+										"Ne peut etre placee que sur un bord droit ou gauche du chemin,<br/>" +
+										"ou a la suite d'une autre barriere.<br/>" +
+										"Ne peut pas obstruer totalement le chemin.</html>");
+		for(int i = 1; i< MesPieges.length; i++){
 			int a = i+1;
 			MesPieges[i] = new JButton("Piege " +a, iconPiege1);
 			MonSousMenuTour.add(MesPieges[i]);
 			MesPieges[i].addActionListener(new BDefense());
 		}
 		
-		nom = new JButton("Nom : " + gameur.name, iconUser);
+		niveau = new JButton("Niveau : " + 0, iconNiveau);
 		vie = new JButton(" PV : " + gameur.vie, iconVie);
 		argent = new JButton("Argent : " + gameur.argent + "$", iconArgent);
-		MonSousMenuJoueur.add(nom);
+		MonSousMenuJoueur.add(niveau);
 		MonSousMenuJoueur.add(vie);
 		MonSousMenuJoueur.add(argent);
 		
@@ -94,7 +102,7 @@ public class Menu extends JLayeredPane {
 		Groupement.add(MonSousMenuJeu);
 		Groupement.setBounds(900,0,300,730);
 		
-		this.add(Groupement, new Integer(200));
+		this.add(Groupement, JLayeredPane.DEFAULT_LAYER);
 			
 	}
 	
@@ -117,6 +125,19 @@ public class Menu extends JLayeredPane {
 	
 	public JButton getStart(){
 		return start;
+	}
+	
+	public void MajMenu(int niv){
+		infoJeu.setText("Le niveau " + niv + " a commence !");
+		niveau.setText("Niveau : " + niv);
+	}
+	
+	public void MajVersPause(){ 
+		start.setIcon(iconPause);
+	}
+	
+	public void MajVersStart(){
+		start.setIcon(iconStart);
 	}
 	
 	public class BDefense implements ActionListener{
@@ -152,7 +173,7 @@ public class Menu extends JLayeredPane {
 				} else {
 					infoJeu.setText("Tu n'as pas assez d'argent !");
 				}
-			} else if(nomButton.equals("Piege 1")){
+			} else if(nomButton.equals("Barriere")){
 				if(bizuth.argent >= Piege1.PRIX){
 					setVariable(5);
 					infoJeu.setText("Choisis la position de ton piege !");
@@ -194,9 +215,7 @@ public class Menu extends JLayeredPane {
 	
 	public static void main (String args[]) {
 		Fenetre test = new Fenetre();
-		//Menu menuTest = new Menu(Bizuth, test);
-		//test.getContentPane().add(MenuTest);
-		// test.menuTest.update(test.getGraphics());
+
 
 	}
 

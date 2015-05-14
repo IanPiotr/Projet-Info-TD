@@ -12,12 +12,12 @@ public class Case extends Rectangle{
 	
 	protected static final int LCASE = 30; //dimension case
 	protected boolean occupe; 	//true si la case est occupée par un élément (tour ou piège), false si elle est libre
-	protected boolean chemin; 	//true si c'est une case située dans le "chemin", false si elle constitue le "mur"
+	protected boolean chemin; 	//true si c'est une case située dans le "chemin"
 	protected boolean bordure;	//true si cette case est une bordure du chemin
+	protected boolean barriere;
 	protected boolean hybride;
 								//NB : False par defaut dans le premier constructeur
 	public Case next;
-	//public Case next2;		//Second pointeur test
 	
 	public Case(int posx, int posy){
 		super(posx, posy, LCASE, LCASE);
@@ -25,8 +25,8 @@ public class Case extends Rectangle{
 		chemin = false;
 		bordure = false;
 		hybride = false;
+		barriere = false;
 		next = null;
-		//next2 = null;
 	}
 	
 	public Case(int posx, int posy, boolean isCh, boolean isOccup){
@@ -36,7 +36,6 @@ public class Case extends Rectangle{
 		bordure = false;
 		hybride = false;
 		next = null;
-		//next2 = null;
 	}
 		
 	public void drawCase(Graphics g){
@@ -47,8 +46,16 @@ public class Case extends Rectangle{
 		chemin = ch;
 	}
 	
+	public void setBarriere(boolean bar){
+		barriere = bar;
+	}
+	
 	public boolean isChemin(){
 		return chemin;
+	}
+	
+	public boolean isBarriere(){
+		return barriere;
 	}
 	
 	

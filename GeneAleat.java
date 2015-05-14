@@ -4,6 +4,11 @@ public abstract class GeneAleat{
 	public static final double ATTENUATION_LAT = 0.95;
 	public static final double ATTENUATION_BAS = 0.8;
 	public static final double DEBUT_CH_DIR = 0.9;
+	/*Listes des bordures chemin*/
+	protected static ListeCases bordureGauche = new ListeCases();
+	protected static ListeCases bordureDroite = new ListeCases();
+	protected static ListeCases bordureBas = new ListeCases();
+	protected static ListeCases bordureHaut = new ListeCases();
 	
 	/*POUR MULTIPLIER DEUX MATRICES*/
 	public static double[][] produitMatrice( double[][] m1, double[][] m2){
@@ -25,22 +30,34 @@ public abstract class GeneAleat{
 	/*POUR GENERER LE CHEMIN PREDEFINI EN ATTENDANT QUE LA GENERATION ALEATOIRE SOIT AU POINT*/
 	public static void predefini(Case[][] tabCases){
 		
-		for(int i=10; i<14; i++){
-				for(int j=0; j<10; j++){
-					tabCases[i][j].setChemin(true);
-				}
-			}
-			for(int i=10; i<20; i++){
-				for(int j=10; j<14; j++){
-					tabCases[i][j].setChemin(true);
-				}
-			}
-			for(int i=16; i<20; i++){
-				for(int j=14; j<24; j++){
-					tabCases[i][j].setChemin(true);
-				}
+		for(int i=15; i<19; i++){
+			for(int j=0; j<10; j++){
+				tabCases[i][j].setChemin(true);
 			}
 		}
+        for(int i=18; i>9; i--){
+			for(int j=10; j<14; j++){
+				tabCases[i][j].setChemin(true);
+			}
+		}
+		for(int i=13; i>9; i--){
+			for(int j=14; j<18; j++){
+				tabCases[i][j].setChemin(true);
+			}
+		}
+		for(int i=10; i<25; i++){
+			for(int j=18; j<22; j++){
+				tabCases[i][j].setChemin(true);
+			}
+		}
+		for(int i=21; i<25; i++){
+			for(int j=21; j<25; j++){
+				tabCases[i][j].setChemin(true);
+			}
+		}
+		
+		genererBordures(tabCases);
+	}
 		
 		/*PREMIERE METHODE DE GENERATION ALEATOIRE*/
 		public static void aleat1(Case[][] tabCases){
@@ -199,6 +216,85 @@ public abstract class GeneAleat{
 						break;
 				}
 				tabCases[x][y].setChemin(true);
+			}
+		}
+		
+		/* INIT BORDURES CHEMIN
+		 * Une case ne doit pas appartenir a deux listes, sinon conflit (pointeurs)
+		 * Donc insertion de clones et non de la case originel si elle est deja dans une autre liste
+		 */
+		public static void genererBordures(Case[][] tabCases){
+			for(int i=0; i<tabCases.length-1; i++){
+				for(int j=0; j<tabCases[0].length-1; j++){
+					if(!tabCases[i][j].chemin && tabCases[i+1][j].chemin){
+						if(!tabCases[i][j].bordure){
+							bordureGauche.insertTete(tabCases[i][j]);
+							tabCases[i][j].bordure = true;
+						} else {
+							Case nc = (Case)tabCases[i][j].clone();
+							tabCases[i][j].hybride = true;
+							nc.hybride = true;
+							bordureGauche.insertTete(nc);
+						}
+					} else if(tabCases[i][j].chemin && !tabCases[i+1][j].chemin){
+						if(!tabCases[i+1][j].bordure){
+							bordureDroite.insertTete(tabCases[i+1][j]);
+							tabCases[i+1][j].bordure = true;
+						} else {
+							Case nc = (Case)tabCases[i+1][j].clone();
+							tabCases[i+1][j].hybride = true;
+							nc.hybride = true;
+							bordureDroite.insertTete(nc);
+						}
+					}
+					if(tabCases[i][j].chemin && !tabCases[i][j+1].chemin){
+						if(!tabCases[i][j+1].bordure){
+							bordureBas.insertTete(tabCases[i][j+1]);
+							tabCases[i][j+1].bordure = true;
+						} else {
+							Case nc = (Case)tabCases[i][j+1].clone();
+							tabCases[i][j+1].hybride = true;
+							nc.hybride = true;
+							bordureBas.insertTete(nc);
+						}
+					} else if(!tabCases[i][j].chemin && tabCases[i][j+1].chemin){
+						if(!tabCases[i][j].bordure){
+							bordureHaut.insertTete(tabCases[i][j]);
+							tabCases[i][j].bordure = true;
+						} else {
+							Case nc = (Case)tabCases[i][j].clone();
+							tabCases[i][j].hybride = true;
+							nc.hybride = true;
+							bordureHaut.insertTete(nc);
+						}
+					}
+				}
+			}
+			//Cas particulier de la derniere ligne
+			for(int i=0; i<tabCases.length-1; i++){
+				if(!tabCases[i][tabCases[0].length -1].chemin && tabCases[i+1][tabCases[0].length -1].chemin){
+					if(!tabCases[i][tabCases[0].length -1].bordure){
+						bordureGauche.insertTete(tabCases[i][tabCases[0].length -1]);
+						tabCases[i][tabCases[0].length -1].bordure = true;
+					} else {
+						Case nc = (Case)tabCases[i][tabCases[0].length -1].clone();
+						nc.bordure = false;
+						tabCases[i][tabCases[0].length -1].hybride = true;
+						nc.hybride = true;
+						bordureGauche.insertTete(nc);
+					}
+				} else if(tabCases[i][tabCases[0].length -1].chemin && !tabCases[i+1][tabCases[0].length -1].chemin){
+					if(!tabCases[i+1][tabCases[0].length -1].bordure){
+						bordureDroite.insertTete(tabCases[i+1][tabCases[0].length -1]);
+						tabCases[i+1][tabCases[0].length -1].bordure = true;
+					} else {
+						Case nc = (Case)tabCases[i+1][tabCases[0].length -1].clone();
+						nc.bordure = true;
+						tabCases[i+1][tabCases[0].length -1].hybride = true;
+						nc.hybride = true;
+						bordureDroite.insertTete(nc);
+					}
+				}
 			}
 		}
 		
