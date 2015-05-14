@@ -16,6 +16,7 @@ public class Case extends Rectangle{
 	protected boolean bordure;	//true si cette case est une bordure du chemin
 	protected boolean barriere;
 	protected boolean hybride;
+	protected Image image;
 								//NB : False par defaut dans le premier constructeur
 	public Case next;
 	
@@ -27,6 +28,12 @@ public class Case extends Rectangle{
 		hybride = false;
 		barriere = false;
 		next = null;
+		try {
+			image = ImageIO.read(new File("caseLambda.png"));
+        	} catch(Exception err){
+			System.out.println("caseLambda.png introuvable !");            
+            	System.exit(0);    
+        	}
 	}
 	
 	public Case(int posx, int posy, boolean isCh, boolean isOccup){
@@ -39,7 +46,7 @@ public class Case extends Rectangle{
 	}
 		
 	public void drawCase(Graphics g){
-		g.fillRect(x, y, width, height);
+		g.drawImage(image, x, y,null);
 	}
 	
 	public void setChemin(boolean ch){
@@ -50,12 +57,24 @@ public class Case extends Rectangle{
 		barriere = bar;
 	}
 	
+	public void setBordure(boolean bord){
+		bordure = bord;
+	}
+	
 	public boolean isChemin(){
 		return chemin;
 	}
 	
 	public boolean isBarriere(){
 		return barriere;
+	}
+	
+	public void setImage(String nomImage){
+		try {
+			image = ImageIO.read(new File(nomImage));
+	   } catch(Exception err){
+			image = null;  
+	    }
 	}
 	
 	
