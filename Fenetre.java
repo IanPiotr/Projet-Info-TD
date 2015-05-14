@@ -46,11 +46,12 @@ public class Fenetre extends JFrame{
     private int nbSpawn;
     private boolean enCours;
     private boolean niveauReady;
+    private Chemin chemin;
     //private boolean pauseDemandee;
 
 	public Fenetre() {
         /* INIT FRAME */
-        super("Tower Defens' Bro !");
+        super("Tower Defense les ptits loups");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1203,770);
         setResizable(true);
@@ -101,9 +102,7 @@ public class Fenetre extends JFrame{
 				tabCases[i][j]= new Case(i*Case.LCASE, j*Case.LCASE);
 			}
 		}
-		GeneAleat.predefini(tabCases);
-		//GeneAleat.aleat1(tabCases);
-		//GeneAleat.aleat2(tabCases);
+		chemin = new Chemin(tabCases[]);
 
         this.addMouseListener(new EcouteurClicSouris());
         
@@ -124,14 +123,6 @@ public class Fenetre extends JFrame{
 		/* PEINTURE FOND */
 		for(int i=0; i<tabCases.length; i++){
 			for(int j=0; j<tabCases[0].length;j++){
-				if((i+j)%2==0){
-					gb.setColor(Color.darkGray);
-				} else {
-					gb.setColor(Color.black);
-				}
-				if (tabCases[i][j].isChemin() || tabCases[i][j].isBarriere()){
-					gb.setColor(Color.lightGray);
-				}
 				tabCases[i][j].drawCase(gb);
 			}
 		}
