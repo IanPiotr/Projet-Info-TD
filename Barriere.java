@@ -40,9 +40,8 @@ public class Barriere extends Element{
 			tabCases[c][j].setChemin(false);
 			tabCases[c][j].setBarriere(true);
 		}
-		chemin.initBordures(tabCases);
-			
-		
+
+		chemin.initBordures(tabCases);	
         		
 		next = null;
 		

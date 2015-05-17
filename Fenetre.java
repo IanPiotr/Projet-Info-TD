@@ -418,7 +418,9 @@ public class Fenetre extends JFrame{
 			if(e.getEnnemi().upgrade == 3 && (int)(2*Math.random()) == 1){
 				SbireFantome sbireFantome = new SbireFantome(ecran, e.getEnnemi().IDEnnemi, e.getEnnemi().posx, e.getEnnemi().posy);
 				sbireFantome.addEnnemiListener(new EcouteurEnnemi());
+
 				listeEnnemis.insertQueue(sbireFantome); //De cette maniere, les tours tirent en priorite sur les fantomes les plus vieux	//Commentaire de Olivier : c'était marqué "listeEnnemis.insertFantome(sbireFantome)". J'ai supposé que c'était une erreur vu qu'il n'existe pas de méthode "inserfantome".
+
 			}				
 			e.getEnnemi().removeEnnemiListener(this);
 			listeEnnemis.suppr(e.getEnnemi());
@@ -475,7 +477,6 @@ public class Fenetre extends JFrame{
     }
 	
 	/* METHODES DE DEBUGAGE */
-	
 	
 	/* Visualisation Rectangle + Arc2D entourant les ennemis */
 	private void showContoursEnnemi(Graphics gb, Ennemis bob){
