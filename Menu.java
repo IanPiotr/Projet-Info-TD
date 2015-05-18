@@ -13,7 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JLayeredPane;
 import javax.swing.ImageIcon;
-
+import javax.swing.JOptionPane;
 
 public class Menu extends JLayeredPane {
 
@@ -27,7 +27,9 @@ public class Menu extends JLayeredPane {
 	private JButton niveau;
 	protected JButton argent;
 	protected JButton vie;
-	protected JLabel infoJeu; // permet de donner des infos au joueur
+	protected JLabel infoJeu; // permet de donner des infos au joueur durant le jeu
+	protected JOptionPane debutJeu;
+	protected JOptionPane tuto;
 	private static final ImageIcon iconTour1 = new ImageIcon("Tour1.png");
 	private static final ImageIcon iconPiege1 = new ImageIcon("Piege1.png");
 	private static final ImageIcon iconBarriere = new ImageIcon("Barriere.png");
@@ -55,6 +57,16 @@ public class Menu extends JLayeredPane {
 		MonSousMenuJeu.setBackground(Color.orange);
 		
 		bizuth = gameur;
+		
+		
+		String[] intro = {"Jouer", "Tutoriel"};
+		debutJeu = new JOptionPane();
+		int rang = debutJeu.showOptionDialog(null, "Salut toi, soit tu joues soit tu te casses !", "Tower Defense !", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, intro, intro[1]);
+		if(rang == 1){
+			System.out.println("Tu as choisi le tuto");
+			tuto = new JOptionPane();
+			tuto.showMessageDialog(null, "Le tower defense est un jeu très simple. L’objectif est d'empêcher des vagues successives d’ennemis de traverser le chemin.\n Tu perdras de la vie à chaque fois qu'un ennemi aura traversé complètement la chemin. Pour combattre les monstres, tu dois \n acheter différents pièges ou tours défensives avec l'argent que tu as gagnes au cours de la partie en tuant des ennemis. Le jeu se \n présente sous forme de niveaux de plus en plus difficiles. A toi de faire tes preuves ! ", "Tutoriel", JOptionPane.INFORMATION_MESSAGE);
+		}
 		
 		MesTours = new JButton[4];
 		for(int i = 0; i< MesTours.length; i++){
@@ -212,11 +224,4 @@ public class Menu extends JLayeredPane {
 		
 	}
 	
-	
-	public static void main (String args[]) {
-		Fenetre test = new Fenetre();
-
-
-	}
-
 }
