@@ -171,6 +171,7 @@ public class Fenetre extends JFrame{
 					level = new Niveau(niveau, 14*Case.LCASE, 19*Case.LCASE);
 					menuTest.infoJeu.setText("Le niveau " + niveau + " a commence !");
 					menuTest.MajMenu(niveau);
+					menuTest.MajVersPause();
 					nbSpawn++;
 					niveauReady = false;
 				}
@@ -442,6 +443,7 @@ public class Fenetre extends JFrame{
 				menuTest.infoJeu.setText("Fin du niveau " + niveau + " !");
 				System.out.println("infoJeu devrait afficher : 'Fin du niveau " + niveau + " !'");
 				enCours = false;
+				menuTest.MajVersStart();
 				niveauReady = true;
 				spawn.stop();
 				if(niveau == 2){
