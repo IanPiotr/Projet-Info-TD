@@ -179,62 +179,87 @@ public class Chemin{
 		/*Retour sur les cases hybrides*/
 		int somme = 0;
 		int indice = 0;
+			
 		for(int i=1; i<tabCases.length-1; i++){			//parcours du tableau
-			for(int j=1; j<tabCases[0].length-1;j++){
+			for(int j=0; j<tabCases[0].length-1;j++){
 				if(!tabCases[i][j].isChemin()){
 					somme = 0;
 					indice = 0;
-					for(int l = j-1; l<=j+1;l++){	//parcours des 9 cases adjacentes à la case considérée
-						for(int k =i-1; k<=i+1;k++){
-							if(!tabCases[k][l].isChemin() && !(k==i && j==l)){
-								somme = somme + (int)Math.pow(2.0,(double)indice);
-							}
-							if (!(k==i && j==l)){
-								indice++;
+					if(j==0){				//cas de la première ligne
+						for(int l = j; l<=j+1;l++){	//parcours des 6 cases adjacentes à la case considérée
+							for(int k =i-1; k<=i+1;k++){
+								if(!tabCases[k][l].isChemin() && !(k==i && j==l)){
+									somme = somme + (int)Math.pow(2.0,(double)indice);
+								}
+								if (!(k==i && j==l)){
+									indice++;
+								}
 							}
 						}
-					}
-					//detection du cas et maj de la texture en conséquence
-					if(somme==47 || somme==43 || somme==11 || somme==15){ //haut gauche
-						tabCases[i][j].setImage(nomImHautGauche);
-					}else if(somme==104 || somme==105 || somme==232 || somme==233){	//bas gauche
-							tabCases[i][j].setImage(nomImBasGauche);
-						}else if(somme==22 || somme==150 || somme==23 || somme==151){	//haut droite
-							tabCases[i][j].setImage(nomImHautDroite);
-						}else if(somme==208 || somme==240 || somme==212 || somme==244){	//bas droite
-							tabCases[i][j].setImage(nomImBasDroite);
-						}else if(somme==127){	//creux haut gauche
-							tabCases[i][j].setImage(nomImHautGaucheCreux);
-						}else if(somme==251){	//creux bas gauche
-							tabCases[i][j].setImage(nomImBasGaucheCreux);
-						}else if(somme==223){	//creux haut droite
-							tabCases[i][j].setImage(nomImHautDroiteCreux);
-						}else if(somme==254){	//creux bas droite
-							tabCases[i][j].setImage(nomImBasDroiteCreux);
-						}else if(somme==9 || somme==40 || somme==41 || somme==8 ){
-							tabCases[i][j].setImage(nomImBasHautGauche);
-						}else if(somme==16 || somme==20 || somme==148 || somme==144 ){
-							tabCases[i][j].setImage(nomImBasHautDroite);
-						}else if(somme==216 || somme==220){
-							tabCases[i][j].setImage(nomImBasCreuxHautDroite);
-						}else if(somme==120 || somme==121){
-							tabCases[i][j].setImage(nomImBasCreuxHautGauche);
-						}else if(somme==30 || somme==158){
-							tabCases[i][j].setImage(nomImHautCreuxBasDroite);
-						}else if(somme==27 || somme==59){
-							tabCases[i][j].setImage(nomImHautCreuxBasGauche);
-						}else if(somme==222){
-							tabCases[i][j].setImage(nomImCreuxDroiteHautBas);
-						}else if(somme==123){
-							tabCases[i][j].setImage(nomImCreuxGaucheHautBas);
-						}else if(somme==56 || somme==24 || somme==152 || somme==28 || somme==25 || somme==57 || somme==156){
-							tabCases[i][j].setImage(nomImHautBas);
+						
+						if(somme==1 || somme==9){ //haut gauche
+							tabCases[i][j].setImage(nomImHautGauche);
+						}else if(somme==4 ||somme==36){	//bas droite
+								tabCases[i][j].setImage(nomImBasDroite);
+						}
+						
+					}else{				//cas des autres lignes
+						for(int l = j-1; l<=j+1;l++){	//parcours des 9 cases adjacentes à la case considérée
+							for(int k =i-1; k<=i+1;k++){
+								if(!tabCases[k][l].isChemin() && !(k==i && j==l)){
+									somme = somme + (int)Math.pow(2.0,(double)indice);
+								}
+								if (!(k==i && j==l)){
+									indice++;
+								}
+							}
+						}
+						//detection du cas et maj de la texture en conséquence
+						if(somme==47 || somme==43 || somme==11 || somme==15){ //haut gauche
+							tabCases[i][j].setImage(nomImHautGauche);
+						}else if(somme==104 || somme==105 || somme==232 || somme==233){	//bas gauche
+								tabCases[i][j].setImage(nomImBasGauche);
+							}else if(somme==22 || somme==150 || somme==23 || somme==151){	//haut droite
+								tabCases[i][j].setImage(nomImHautDroite);
+							}else if(somme==208 || somme==240 || somme==212 || somme==244){	//bas droite
+								tabCases[i][j].setImage(nomImBasDroite);
+							}else if(somme==127){	//creux haut gauche
+								tabCases[i][j].setImage(nomImHautGaucheCreux);
+							}else if(somme==251){	//creux bas gauche
+								tabCases[i][j].setImage(nomImBasGaucheCreux);
+							}else if(somme==223){	//creux haut droite
+								tabCases[i][j].setImage(nomImHautDroiteCreux);
+							}else if(somme==254){	//creux bas droite
+								tabCases[i][j].setImage(nomImBasDroiteCreux);
+							}else if(somme==9 || somme==40 || somme==41 || somme==8 ){
+								tabCases[i][j].setImage(nomImBasHautGauche);
+							}else if(somme==16 || somme==20 || somme==148 || somme==144 ){
+								tabCases[i][j].setImage(nomImBasHautDroite);
+							}else if(somme==216 || somme==220){
+								tabCases[i][j].setImage(nomImBasCreuxHautDroite);
+							}else if(somme==120 || somme==121){
+								tabCases[i][j].setImage(nomImBasCreuxHautGauche);
+							}else if(somme==30 || somme==158){
+								tabCases[i][j].setImage(nomImHautCreuxBasDroite);
+							}else if(somme==27 || somme==59){
+								tabCases[i][j].setImage(nomImHautCreuxBasGauche);
+							}else if(somme==222){
+								tabCases[i][j].setImage(nomImCreuxDroiteHautBas);
+							}else if(somme==123){
+								tabCases[i][j].setImage(nomImCreuxGaucheHautBas);
+							}else if(somme==56 || somme==24 || somme==152 || somme==28 || somme==25 || somme==57 || somme==156){
+								tabCases[i][j].setImage(nomImHautBas);		
+							}	
 						}
 					}
+					
+					if(j==0){
+					System.out.println("i = " +i+ "j = "+j + " somme = " + somme);
+					}
+					
 				}
 			}
-			
-	}
+		}
 		
 		
 	
@@ -276,7 +301,7 @@ public class Chemin{
 			int h = tabCases[0].length;
 			int xdebut = 15;
 			int x = xdebut;
-			int y = 0;
+			int y = -1;
 			double tmp;
 			double rand;
 			int dir = 1;			// 0=droite, 1=bas, 2=gauche
@@ -284,10 +309,6 @@ public class Chemin{
 			double[] dirProba = {0,1,0};
 			
 			while(y<h-1){
-				
-				//System.out.println(dir);
-				//System.out.print((double)Math.round(dirProba[0]*100)/100 + "  " + (double)Math.round(dirProba[1]*100)/100 + "  " + (double)Math.round(dirProba[2]*100)/100);
-				//System.out.println();
 				
 				rand = Math.random();
 				if(rand<dirProba[0] && x>2){	//gauche
@@ -336,6 +357,12 @@ public class Chemin{
 						x++;
 						break;
 				}
+				
+				/*cas de la première ligne*/
+				if(y<=1){
+					tabCases[x+2][y].setChemin(true);
+				}
+
 				if(x+2<l && y<h){
 					tabCases[x+1][y].setChemin(true);
 				}
