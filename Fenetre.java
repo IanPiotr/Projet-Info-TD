@@ -47,6 +47,7 @@ public class Fenetre extends JFrame{
     private boolean enCours;
     private boolean niveauReady;
     private Chemin chemin;
+    private Image background;
     //private boolean pauseDemandee;
 
 	public Fenetre() {
@@ -103,6 +104,12 @@ public class Fenetre extends JFrame{
 			}
 		}
 		chemin = new Chemin(tabCases);
+		
+		try {
+			background = ImageIO.read(new File("Background.jpg"));
+        } catch(Exception err){
+			System.out.println("background non trouvé"); 
+        }
 
         this.addMouseListener(new EcouteurClicSouris());
         
@@ -119,7 +126,9 @@ public class Fenetre extends JFrame{
 	 */
 	public void paint(Graphics g) {
 		Graphics gb = monBuf.getGraphics();
+		gb.drawImage(background, 0, 0, null);
 		menuTest.paint(gb);
+		
 		/* PEINTURE FOND */
 		for(int i=0; i<tabCases.length; i++){
 			for(int j=0; j<tabCases[0].length;j++){
@@ -151,7 +160,7 @@ public class Fenetre extends JFrame{
 		}
 		
 		/* DESSIN GLOBAL */
-        g.drawImage(monBuf,0,39,null); //8,31 sur windows
+        g.drawImage(monBuf,8,31,null); //8,31 sur windows
         
     }
     

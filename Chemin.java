@@ -268,8 +268,8 @@ public class Chemin{
 		}
 	}
 		
-		/*METHODE DE GENERATION ALEATOIRE*/
-		public void aleat2(Case[][] tabCases){
+	/*METHODE DE GENERATION ALEATOIRE*/
+	public void aleat2(Case[][] tabCases){
 			
 			/* GENERATION TRAJET*/
 			int l = tabCases.length;
@@ -336,10 +336,11 @@ public class Chemin{
 						x++;
 						break;
 				}
-				if(x+2<l && y+1<h){
+				if(x+2<l && y+2<h){
 					tabCases[x+1][y].setChemin(true);
 					tabCases[x+1][y+1].setChemin(true);
 					tabCases[x+2][y+1].setChemin(true);
+					tabCases[x+3][y+2].setChemin(true);
 				}
 				tabCases[x][y].setChemin(true);
 			}
