@@ -448,21 +448,21 @@ public class Fenetre extends JFrame{
 				spawn.stop();
 				if(niveau == 2){
 					JOptionPane level3 = new JOptionPane();
-					level3.showMessageDialog(null, "Felicitations, tu as servecu aux deux premieres vagues !",
+					level3.showMessageDialog(null, "Felicitations, tu as survécu aux deux premières vagues !",
 											"Niveau 3", JOptionPane.INFORMATION_MESSAGE);
 					ImageIcon icone = new ImageIcon(Ennemis.nomImage2);
 					level3.showMessageDialog(null, "L'ennemis n'est pas content, il va maintenant commencer a envoyer des Sbires Verts !" +
-											"\n" + "Attention, ils sont plus resistants que ceux que tu as vu jusqu'a present...",
+											"\n" + "Attention, ils sont plus resistants que ceux que tu as vu jusqu'à présent...",
 											"Niveau 3", JOptionPane.INFORMATION_MESSAGE, icone);
 				} else if(niveau == 6){
 					ImageIcon icone = new ImageIcon(Ennemis.nomImage3);
 					JOptionPane level7 = new JOptionPane();
 					level7.showMessageDialog(null, "L'ennemi va maintenant pouvoir envoyer des Sbires Rouges," +
-											"\n" + "ses plus fideles combatants !",
+											"\n" + "ses plus fidèles combatants !",
 											"Niveau 7", JOptionPane.INFORMATION_MESSAGE, icone);
 					icone = new ImageIcon(SbireFantome.nomFantome);
 					level7.showMessageDialog(null, "On raconte que certains d'entres eux sont encore plus terribles dans la mort," +
-											"\n" + "et ne seraient ainsi plus soumis aux memes lois que les vivants...",
+											"\n" + "et ne seraient ainsi plus soumis aux mêmes lois que les vivants...",
 											"Niveau 7", JOptionPane.INFORMATION_MESSAGE, icone);
 				}
 				timer.stop();
