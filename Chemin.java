@@ -336,10 +336,16 @@ public class Chemin{
 						x++;
 						break;
 				}
-				if(x+2<l && y+2<h){
+				if(x+2<l && y<h){
 					tabCases[x+1][y].setChemin(true);
+				}
+				if(x+1<l && y+1<h){
 					tabCases[x+1][y+1].setChemin(true);
+				}
+				if(x+2<l && y+1<h){
 					tabCases[x+2][y+1].setChemin(true);
+				}
+				if(x+3<l && y+2<h){
 					tabCases[x+3][y+2].setChemin(true);
 				}
 				tabCases[x][y].setChemin(true);
