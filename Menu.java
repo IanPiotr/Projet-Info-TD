@@ -65,7 +65,7 @@ public class Menu extends JLayeredPane {
 		if(rang == 1){
 			System.out.println("Tu as choisi le tuto");
 			tuto = new JOptionPane();
-			tuto.showMessageDialog(null, "Le tower defense est un jeu très simple. L’objectif est d'empêcher des vagues successives d’ennemis de traverser le chemin.\n Tu perdras de la vie à chaque fois qu'un ennemi aura traversé complètement la chemin. Pour combattre les monstres, tu dois \n acheter différents pièges ou tours défensives avec l'argent que tu as gagnes au cours de la partie en tuant des ennemis. Le jeu se \n présente sous forme de niveaux de plus en plus difficiles. A toi de faire tes preuves ! ", "Tutoriel", JOptionPane.INFORMATION_MESSAGE);
+			tuto.showMessageDialog(null, "Le tower defense est un jeu très simple. L’objectif est d'empêcher des vagues successives d’ennemis de traverser le chemin.\n Tu perdras de la vie à chaque fois qu'un ennemi aura traversé complètement la chemin. Pour combattre les monstres, tu dois \n acheter différents pièges ou tours défensives avec l'argent que tu as gagné au cours de la partie en tuant des ennemis. Le jeu se \n présente sous forme de niveaux de plus en plus difficiles. A toi de faire tes preuves ! ", "Tutoriel", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
 		MesTours = new JButton[4];
