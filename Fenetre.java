@@ -633,8 +633,6 @@ public class Fenetre extends JFrame{
 	
 	/* METHODES DE DEBUGAGE */
 	
-	
-	
 	/* Visualisation Rectangle + Arc2D entourant les ennemis */
 	private void showContoursEnnemi(Graphics gb, Ennemis bob){
 		gb.setColor(Color.red);
