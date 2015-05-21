@@ -23,7 +23,7 @@ public class Joueur {
 	public Joueur(String nomJoueur){
 		
 		argent = 5000; // à déterminer
-		vie = 200; // à déterminer
+		vie = 5; // à déterminer
 		name = nomJoueur; 
 		
 		cadreJoueur = new JPanel();

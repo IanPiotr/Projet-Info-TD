@@ -3,9 +3,7 @@ import java.awt.Rectangle;
 public class Niveau{
 
 	private int nbEnnemis;
-	private int xMin;
-	private int xMax;
-	private static final int ENNEMIS_DE_BASE = 2;
+	private static final int ENNEMIS_DE_BASE = 9;
 	private static final int ENNEMIS_PAR_NIVEAU = 1;
 	private static final int VIE_ENNEMIS_BASE = 70;
 	private static final int VIE_ENNEMIS_PAR_NIVEAU = 10;
@@ -74,7 +72,7 @@ public class Niveau{
 		//Pas d'ennemis d'upgrade 3 avant le niveau 7, car 20e^-1.2 = 6.02 > 6*x, x dans [0,1[
 		//Niveau 7 : environ 2 chances sur 7 d'avoir un ennemis d'upgrade 3, car 20e^-1.4 = 4.93 sur 6.999
 		//Niveau 8 : 1 chance sur 2 environ, car 20e^-1.7 = 4.93 sur 7.999
-		//Puis de meme l'intervalle tend vers 0, donc la proba d'avoir un ennemis d'pgrade 2 aussi
+		//Puis de meme l'intervalle tend vers 0, donc la proba d'avoir un ennemis d'upgrade 2 aussi
 		} else if((level)*Math.random() < 20*Math.exp(-level*0.2)){
 			return 2;
 		} else return 3;

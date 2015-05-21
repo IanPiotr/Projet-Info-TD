@@ -22,6 +22,12 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.IOException;
+
 		/* BOGS CONNUS
 			 * Probleme de timer lorsqu'on lance un niveau avant la vraie fin du precedent
 			 * Barrieres peuvent obstruer la totalite du chemin
@@ -33,6 +39,7 @@ public class Fenetre extends JFrame{
 	//private static final long serialVersionUID = 43L; 
 	private Rectangle ecran;
     private BufferedImage monBuf;
+    private Image background;
     private Timer timer;
     private Timer spawn;
     private ListeEnnemis listeEnnemis;
@@ -41,13 +48,14 @@ public class Fenetre extends JFrame{
     protected Menu menuTest;
     protected Joueur bizuth;
     private Case[][] tabCases;
+    private Chemin chemin;
     private Niveau level;
     private int niveau;
+    private int score;
     private int nbSpawn;
+    private long cadence;
     private boolean enCours;
     private boolean niveauReady;
-    private Chemin chemin;
-    private Image background;
     //private boolean pauseDemandee;
 
 	public Fenetre() {
@@ -56,7 +64,7 @@ public class Fenetre extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1203,770);
         setResizable(true);
-        ecran = new Rectangle(getInsets().left, getInsets().top+20, getSize().width-getInsets().right-300, getSize().height-getInsets().bottom-10);
+        ecran = new Rectangle(getInsets().left, getInsets().top, getSize().width-getInsets().right-300, getSize().height-getInsets().bottom-10);
         
         /* INIT BUFFER */
         Dimension dim = getSize();
@@ -64,6 +72,7 @@ public class Fenetre extends JFrame{
 		
 		/* INIT JOUEUR */
         bizuth = new Joueur("Bizuth1");
+        score = 0;
         
         /* INIT ENNEMIS */
         listeEnnemis = new ListeEnnemis();
@@ -81,18 +90,15 @@ public class Fenetre extends JFrame{
 		
         /* INIT TIMERS */
         timer = new Timer(15, new letsDance());
-        timer.start();
         spawn = new Timer(600, new letsSpawn());
-        //spawn.setInitialDelay(600);
         
         /* INIT NIVEAU */
         niveau = 0;
         nbSpawn = -1;
-		level = new Niveau(niveau, 15*Case.LCASE, 19*Case.LCASE);
+		level = new Niveau(niveau, 13*Case.LCASE, 19*Case.LCASE);
 		enCours = false;
 		niveauReady = true;
-		//pauseDemandee = false;
-		
+				
         /* INIT QUADRILAGE DE LA CARTE
          * Uniquement sur la zone jouable
          * Chemin predefini pour le moment
@@ -103,10 +109,11 @@ public class Fenetre extends JFrame{
 				tabCases[i][j]= new Case(i*Case.LCASE, j*Case.LCASE);
 			}
 		}
-		chemin = new Chemin(tabCases);
 		
+		chemin = new Chemin(tabCases);
 		try {
 			background = ImageIO.read(new File("Background.jpg"));
+			System.out.println("background charge"); 
         } catch(Exception err){
 			System.out.println("background non trouvé"); 
         }
@@ -126,9 +133,8 @@ public class Fenetre extends JFrame{
 	 */
 	public void paint(Graphics g) {
 		Graphics gb = monBuf.getGraphics();
-		gb.drawImage(background, 0, 0, null);
 		menuTest.paint(gb);
-		
+		gb.drawImage(background, 0, 0, null);
 		/* PEINTURE FOND */
 		for(int i=0; i<tabCases.length; i++){
 			for(int j=0; j<tabCases[0].length;j++){
@@ -160,7 +166,7 @@ public class Fenetre extends JFrame{
 		}
 		
 		/* DESSIN GLOBAL */
-        g.drawImage(monBuf,8,31,null); //8,31 sur windows
+        g.drawImage(monBuf,8,31,null);
         
     }
     
@@ -180,7 +186,6 @@ public class Fenetre extends JFrame{
 					level = new Niveau(niveau, 14*Case.LCASE, 19*Case.LCASE);
 					menuTest.infoJeu.setText("Le niveau " + niveau + " a commence !");
 					menuTest.MajMenu(niveau);
-					menuTest.MajVersPause();
 					nbSpawn++;
 					niveauReady = false;
 				}
@@ -201,7 +206,8 @@ public class Fenetre extends JFrame{
 		}
 	}
 	
-	public void boucle() {
+	private void boucle() {
+		cadence++;
 		Ennemis cur = listeEnnemis.root;
 		while(cur != null){
 			cur.moveChemin(tabCases, chemin.bordureGauche, chemin.bordureDroite, chemin.bordureHaut, chemin.bordureBas);
@@ -259,33 +265,112 @@ public class Fenetre extends JFrame{
 		/* FIN DE L'ESSAI */
 		
 		/* GESTION TIR - ESSAI AVEC FOCUS
-		 * Essayons de faire perdre de la vie aux ennemis
+		 * Essayons de faire perdre de la vie aux ennemis ou de les ralentir
 		 * lorsqu'ils passent a proximite d'une tour
 		 * C'est a dire lorsqu'ils sont dans le cercle portee des tours
 		 * Gestion du focus par un simple break et le placement en tete de liste du sbire le plus vieux !
 		 */
 		Tour curT = listeTour.root;
+		//Mise a zero de la notation du ralentissement et du benissement
+		cur = listeEnnemis.root;
+		while(cur != null){
+			cur.setRalenti(false);
+			cur.setBeni(false);
+			cur = cur.next;
+		}
+		//Tir
 		while(curT != null){
-			Ennemis curE = listeEnnemis.root;
-			while(curE != null){
-				if(curT.collision(curE)){
-					curE.setVie(curT.puissance);
-					break;	//Permet le FOCUS d'un UNIQUE ennemi
-							//Pour 2 ? Mettre un compteur et break a deux ! :)
-							//On pourra differencier les cas suivant la nature des tours
+			curT.tir(cadence, listeEnnemis);
+			curT = curT.next;
+		}
+				
+		/* FIN DE L'ESSAI */
+		repaint();
+	}
+	
+	private void ecrireScore(int score){
+		//Variables lecture fichier scores
+		FileReader lecteur = null;
+		BufferedReader tamponLecture = null;
+		//Variables ecriture fichier scores
+		FileWriter ecriveur = null;
+		BufferedWriter tamponEcriture = null;
+		//Potentielle String a ecrire dans le fichier des scores
+		String scoreString = bizuth.name + " " + score;
+		
+		try {
+			lecteur = new FileReader("scores.txt");
+			tamponLecture = new BufferedReader(lecteur);
+			String ligne;
+			int exScore = 0;
+			while(true) {
+				ligne = tamponLecture.readLine();
+				if(ligne == null) break;
+				for(int i = 0 ; i < ligne.length() ; i++){
+					if(ligne.charAt(i) == ' '){
+						exScore = Integer.parseInt(ligne.substring(i+1, ligne.length()));
+						break;
+					}
 				}
-				if(curE != null){
-					curE = curE.next;
-				}
+				if(exScore > 0) break;
 			}
-			if(curT != null){
-				curT = curT.next;
+			System.out.println("exScore " + exScore);
+			if(score > exScore) {
+				ecriveur = new FileWriter("scores.txt");
+				tamponEcriture = new BufferedWriter(ecriveur);
+				tamponEcriture.write(scoreString);
+				System.out.println("Nouveau Score " + score);
+			} else System.out.println("Imbattu");
+		} catch (IOException e){
+			e.printStackTrace();
+		} finally {
+			//On doit tout fermer
+			try {
+				//pour s'assurer que tous les octets ont etes envoyes au fichier texte
+				if(ecriveur != null) {
+					tamponEcriture.flush(); 
+					tamponEcriture.close();
+					ecriveur.close();
+				}
+				tamponLecture.close();
+				lecteur.close();
+			} catch (IOException e2) {
+				e2.printStackTrace();
 			}
 		}
+			
+	}
+	
+	public void recommencer(){
+		/* INIT JOUEUR */
+        bizuth = new Joueur("Bizuth1");
+        score = 0;
+        
+        /* INIT ENNEMIS */
+        listeEnnemis = new ListeEnnemis();
 		
-		//testCollisionBarrieres();
+		/* INIT TOURS */
+        listeTour = new ListeTour();
+        
+        /* INIT BARRIERES */
+        listeBarrieres = new ListeElement();
+        
 		
-		/* FIN DE L'ESSAI */
+        /* INIT TIMERS */
+        timer.stop();
+        spawn.stop();
+        
+        /* INIT MENU */
+        menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+        menuTest.vie.setText("PV : " + bizuth.vie);
+        
+        /* INIT NIVEAU */
+        niveau = 0;
+        nbSpawn = -1;
+		level = new Niveau(niveau, 15*Case.LCASE, 19*Case.LCASE);
+		enCours = false;
+		niveauReady = true;
+		
 		repaint();
 	}
 	
@@ -295,93 +380,124 @@ public class Fenetre extends JFrame{
 		//BUTTON3 = clic droit
 		
 		public void mouseClicked(MouseEvent e){
+			//Prise du bouton sur lequel on a appuye
 			int boutonSouris = e.getButton();
+			//Initialisation booleen verification de pose pour ne pas cancel si on place au mauvais endroit
 			boolean pose = true;
-			if(boutonSouris == e.BUTTON1){
-				//Pour ne pas placer une tour hors de la zone de jeu :
-				if(e.getX() < ecran.width - 12 && e.getY() < ecran.height - 25){
-					
-				switch(menuTest.getVariable()){
-					//NB : 	les Tour1 sont placees par leur centre (d'ou le -12 -20, - facteur correctif 8,31 pour windows)
-					//		de meme pour les Piege1
-					case 1:
-						listeTour.insertTete(new Tour1(ecran, e.getX()-20, e.getY()-51));
-						listeTour.display();
-						bizuth.argent -= Tour1.PRIX;
-						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-						menuTest.getInfoJeu().setText("Tour1 en position !");
-						break;
-					
-					case 2:
-						listeTour.insertTete(new Tour1(ecran, e.getX(), e.getY()));
-						bizuth.argent -= Tour1.PRIX;
-						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-						menuTest.getInfoJeu().setText("Tour2 en position !");
-						break;
-					
-					case 3:
-						listeTour.insertTete(new Tour1(ecran, e.getX(), e.getY()));
-						bizuth.argent -= Tour1.PRIX;
-						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-						menuTest.getInfoJeu().setText("Tour3 en position !");
-						break;
-					
-					case 4:
-						listeTour.insertTete(new Tour1(ecran, e.getX(), e.getY()));
-						bizuth.argent -= Tour1.PRIX;
-						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-						menuTest.getInfoJeu().setText("Tour4 en position !");
-						break;
-					
-					case 5:
-						int i = (int)((e.getX()-8)/Case.LCASE);;
-						int j = (int)((e.getY()-31)/Case.LCASE);
-						int x = i*Case.LCASE + 5;
-						int y = j*Case.LCASE + 3;
-						j = (int)((y + 24)/Case.LCASE);
-						i = (int)(x/Case.LCASE);
-						if(!tabCases[i][j+1].isChemin() || !tabCases[i][j-1].isChemin() || !tabCases[i+1][j+1].isChemin() || !tabCases[i+1][j-1].isChemin() || (tabCases[i-1][j].isChemin() && tabCases[i+2][j].isChemin())){
-							menuTest.getInfoJeu().setText("Impossible de placer une barriere ici !");
-							pose = false;
-						} else {
-							listeBarrieres.insertTete(new Barriere(x, y, tabCases, chemin));
-							bizuth.argent -= Barriere.PRIX;
-							menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-							menuTest.getInfoJeu().setText("Barriere en position !");
-						}
-						break;
-						
-					case 6:
-						listeTour.insertTete(new Piege1(e.getX(), e.getY()));
-						bizuth.argent -= Piege1.PRIX;
-						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-						menuTest.getInfoJeu().setText("Piege2 en position !");
-						break;
-						
-					case 7:
-						listeTour.insertTete(new Piege1(e.getX(), e.getY()));
-						bizuth.argent -= Piege1.PRIX;
-						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-						menuTest.getInfoJeu().setText("Piege3 en position !");
-						break;
-						
-					case 8:
-						listeTour.insertTete(new Piege1(e.getX(), e.getY()));
-						bizuth.argent -= Piege1.PRIX;
-						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-						menuTest.getInfoJeu().setText("Piege4 en position !");
-						break;
-						
-				}
-				
-				}
-				
-			if(pose) menuTest.setVariable(0);
-			repaint();
+			//Prise des indices de la case cliquee
+			int i = (int)((e.getX()-8)/Case.LCASE);;	//-8 pour contrer le decalage du buffer
+			int j = (int)((e.getY()-31)/Case.LCASE);	//-31 pour contrer le decalage du buffer
+			//Redefinition de la position associee
+			int x = i*Case.LCASE;
+			int y = j*Case.LCASE;
+			//
+			String str = "Tour";
 
-			} else if(boutonSouris == e.BUTTON3){
-				menuTest.setVariable(0);
+			//Si on a cliquee sur un case vide
+			if(!tabCases[i][j].isOccupe()){
+				if(boutonSouris == e.BUTTON1){
+					//Pour ne pas placer une tour hors de la zone de jeu :
+					if(e.getX() < ecran.width - 12 && e.getY() < ecran.height - 25)					
+					switch(menuTest.getVariable()){
+						//NB : 	les objets sont places au centre des cases
+						case 1:
+							if(!tabCases[i][j].isChemin()){
+								listeTour.insertTete(new Tour1(ecran, x+1, y-7));	//+1 -7 pour replacer l'image bien au centre
+								bizuth.argent -= Tour1.PRIX;
+							} else {
+								pose = false;
+							}
+							break;
+						
+						case 2:
+							if(!tabCases[i][j].isChemin()){
+								listeTour.insertTete(new Tour2(ecran, x+1, y-2));
+								bizuth.argent -= Tour2.PRIX;
+								break;
+							} else {
+								pose = false;
+							}
+						
+						case 3:
+							if(!tabCases[i][j].isChemin()){
+								listeTour.insertTete(new Tour3(ecran, x, y));
+								bizuth.argent -= Tour3.PRIX;
+								break;
+							} else {
+								pose = false;
+							}
+						
+						case 4:
+							if(!tabCases[i][j].isChemin()){
+								listeTour.insertTete(new Tour4(ecran, x, y-2));
+								bizuth.argent -= Tour4.PRIX;
+								break;
+							} else {
+								pose = false;
+							}
+						
+						case 5:
+							if(!tabCases[i][j+1].isChemin() || !tabCases[i][j-1].isChemin() || !tabCases[i+1][j+1].isChemin() || !tabCases[i+1][j-1].isChemin() || (tabCases[i-1][j].isChemin() && tabCases[i+2][j].isChemin())){
+								pose = false;
+							} else {
+								listeBarrieres.insertTete(new Barriere(x+5, y+3, tabCases));
+								bizuth.argent -= Barriere.PRIX;
+								menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+								str = "Barriere";
+							}
+							break;
+							
+						case 6:
+							if(tabCases[i][j].isChemin()){
+								listeTour.insertTete(new Piege1(x, y));
+								bizuth.argent -= Piege1.PRIX;
+								break;
+							} else {
+								pose = false;
+							}
+							
+						case 7:
+							if(tabCases[i][j].isChemin()){
+								listeTour.insertTete(new Piege2(x, y));
+								bizuth.argent -= Piege2.PRIX;
+								break;
+							} else {
+								pose = false;
+							}
+								
+						case 8:
+							if(tabCases[i][j].isChemin()){
+								listeTour.insertTete(new Piege3(x, y));
+								bizuth.argent -= Piege3.PRIX;
+								break;
+							} else {
+								pose = false;
+							}
+					}
+					
+					if(menuTest.getVariable() == 6 || menuTest.getVariable() == 7 || menuTest.getVariable() == 8){
+						str = "Piege";
+					}
+				
+					//Si on a bel et bien pose quelque chose
+					if(pose){
+						menuTest.setVariable(0);
+						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+						tabCases[i][j].setOccupe(true);
+						menuTest.getInfoJeu().setText(str + " en position !");
+					} else {
+						menuTest.getInfoJeu().setText("Impossible de placer ca ici !");
+					}
+					repaint();
+
+				} else if(boutonSouris == e.BUTTON3){
+					menuTest.setVariable(0);
+				}
+			
+			} else {
+				menuTest.getInfoJeu().setText("Impossible de placer ca ici !");
 			}
+				
 		}
 		
 		public void mouseExited(MouseEvent e){
@@ -428,10 +544,17 @@ public class Fenetre extends JFrame{
 			if(e.getEnnemi().upgrade == 3 && (int)(2*Math.random()) == 1){
 				SbireFantome sbireFantome = new SbireFantome(ecran, e.getEnnemi().IDEnnemi, e.getEnnemi().posx, e.getEnnemi().posy);
 				sbireFantome.addEnnemiListener(new EcouteurEnnemi());
-
-				listeEnnemis.insertQueue(sbireFantome); //De cette maniere, les tours tirent en priorite sur les fantomes les plus vieux	//Commentaire de Olivier : c'était marqué "listeEnnemis.insertFantome(sbireFantome)". J'ai supposé que c'était une erreur vu qu'il n'existe pas de méthode "inserfantome".
-
-			}				
+				listeEnnemis.insertFantome(sbireFantome); //De cette maniere, les tours tirent en priorite sur les fantomes les plus vieux
+			}
+			score += level.matriceC[4][e.getEnnemi().IDEnnemi];
+			int recompense;
+			if(e.getEnnemi().isBeni()){
+				recompense = 2*e.getEnnemi().getRecompense();
+			} else {
+				recompense = e.getEnnemi().getRecompense();
+			}
+			bizuth.argent += recompense;
+			menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 			e.getEnnemi().removeEnnemiListener(this);
 			listeEnnemis.suppr(e.getEnnemi());
 			finDuNiveau();
@@ -441,6 +564,27 @@ public class Fenetre extends JFrame{
 			System.out.print("Un ennemi est victorieux ! ");
 			System.out.println(e.getEnnemi());
 			bizuth.setVie(1);
+			if(bizuth.vie <= 0) {
+				ecrireScore(score);
+				spawn.stop();
+				timer.stop();
+				menuTest.infoJeu.setText("Fin du jeu, tu as perdu au niveau " + niveau + " !");
+				System.out.println("infoJeu devrait afficher : 'Fin du jeu, tu as perdu au niveau " + niveau + " !'");
+				enCours = false;
+				menuTest.MajVersStart();
+				niveauReady = true;
+				JOptionPane finJeu = new JOptionPane();
+				String[] fin = {"Recommencer", "Quitter"};
+				int rang = finJeu.showOptionDialog(null, "Fin du jeu, tu as perdu au niveau " + niveau + " ! \nDommage, tu essaieras de faire mieux la prochaine fois !", "GAME OVER !", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, fin, fin[1]);
+				if(rang == 1){
+					System.out.println("Tu as choisi de quitter");
+					System.exit(0);
+				}
+				if(rang == 0){
+					System.out.println("Tu as choisi de recommencer");
+					recommencer();
+				}
+			}
 			menuTest.vie.setText("PV : " + bizuth.vie);
 			e.getEnnemi().removeEnnemiListener(this);
 			listeEnnemis.suppr(e.getEnnemi());
@@ -448,30 +592,30 @@ public class Fenetre extends JFrame{
 		}
 		
 		public void finDuNiveau(){
-			if(listeEnnemis.root == null){
+			if(listeEnnemis.root == null && nbSpawn == -1){
 				menuTest.infoJeu.setText("Fin du niveau " + niveau + " !");
 				System.out.println("infoJeu devrait afficher : 'Fin du niveau " + niveau + " !'");
 				enCours = false;
-				menuTest.MajVersStart();
 				niveauReady = true;
+				menuTest.MajVersStart();
 				spawn.stop();
 				if(niveau == 2){
 					JOptionPane level3 = new JOptionPane();
-					level3.showMessageDialog(null, "Felicitations, tu as survécu aux deux premières vagues !",
+					level3.showMessageDialog(null, "Felicitations, tu as servecu aux deux premieres vagues !",
 											"Niveau 3", JOptionPane.INFORMATION_MESSAGE);
 					ImageIcon icone = new ImageIcon(Ennemis.nomImage2);
 					level3.showMessageDialog(null, "L'ennemis n'est pas content, il va maintenant commencer a envoyer des Sbires Verts !" +
-											"\n" + "Attention, ils sont plus resistants que ceux que tu as vu jusqu'à présent...",
+											"\n" + "Attention, ils sont plus resistants que ceux que tu as vu jusqu'a present...",
 											"Niveau 3", JOptionPane.INFORMATION_MESSAGE, icone);
 				} else if(niveau == 6){
 					ImageIcon icone = new ImageIcon(Ennemis.nomImage3);
 					JOptionPane level7 = new JOptionPane();
 					level7.showMessageDialog(null, "L'ennemi va maintenant pouvoir envoyer des Sbires Rouges," +
-											"\n" + "ses plus fidèles combatants !",
+											"\n" + "ses plus fideles combatants !",
 											"Niveau 7", JOptionPane.INFORMATION_MESSAGE, icone);
 					icone = new ImageIcon(SbireFantome.nomFantome);
 					level7.showMessageDialog(null, "On raconte que certains d'entres eux sont encore plus terribles dans la mort," +
-											"\n" + "et ne seraient ainsi plus soumis aux mêmes lois que les vivants...",
+											"\n" + "et ne seraient ainsi plus soumis aux memes lois que les vivants...",
 											"Niveau 7", JOptionPane.INFORMATION_MESSAGE, icone);
 				}
 				timer.stop();
@@ -489,6 +633,46 @@ public class Fenetre extends JFrame{
 	
 	/* METHODES DE DEBUGAGE */
 	
+	/* Visualisation bordures */
+	private void showBordures(Graphics gb){
+		Case curc = GeneAleat.bordureBas.root;
+		while(curc != null){
+			gb.setColor(Color.green);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
+			curc.drawCase(gb);
+			curc = curc.next;				
+		}
+		curc = GeneAleat.bordureHaut.root;
+		while(curc != null){
+			gb.setColor(Color.pink);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+		curc = GeneAleat.bordureGauche.root;
+		while(curc != null){
+			gb.setColor(Color.orange);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+		curc = GeneAleat.bordureDroite.root;
+		while(curc != null){
+			gb.setColor(Color.red);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+	}
+	
 	/* Visualisation Rectangle + Arc2D entourant les ennemis */
 	private void showContoursEnnemi(Graphics gb, Ennemis bob){
 		gb.setColor(Color.red);
@@ -499,7 +683,7 @@ public class Fenetre extends JFrame{
 	
 	/* Visualisation Arc2D portee des tours */
 	private void showPorteeTour(Graphics gb, Tour eiffel){
-		gb.setColor(Color.red);
+		gb.setColor(Color.white);
 		gb.drawArc(eiffel.getPosx()-(int)eiffel.portee.getWidth()/2 + eiffel.cadre.width/2, eiffel.getPosy()-(int)eiffel.portee.getHeight()/2+ eiffel.cadre.height/2, (int)eiffel.portee.getWidth(), (int)eiffel.portee.getHeight(), 0, 360);
 	}
     

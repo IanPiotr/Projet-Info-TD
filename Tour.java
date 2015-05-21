@@ -1,4 +1,4 @@
-import java.awt.Graphics;
+ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -12,14 +12,16 @@ import java.io.File;
 import javax.imageio.ImageIO;
 
 
-public class Tour extends Element {
+public abstract class Tour extends Element {
 	
 	public int prix;
 	protected int puissance;
 	protected Arc2D.Double portee;
+	protected int coeffVit;
 	public Tour next;
+	protected int focus;
 	
-	public Tour(String nomImage, int px, int py, int cout, int force, int range){
+	public Tour(String nomImage, int px, int py, int cout, int force, int range, int c, int nbFocus){
 		super();
 		
 		try {
@@ -33,6 +35,8 @@ public class Tour extends Element {
         
 		prix = cout;
 		puissance = force;
+		coeffVit = c;
+		focus=nbFocus;
 		
 		next = null;
 		
@@ -51,6 +55,9 @@ public class Tour extends Element {
 		return this.portee.intersects(elem.cadre);
 	}
 	//*//
+	
+	public abstract void tir(long cadence, ListeEnnemis le);
+		
 	
 	
 }

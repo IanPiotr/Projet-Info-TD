@@ -31,7 +31,12 @@ public class Menu extends JLayeredPane {
 	protected JOptionPane debutJeu;
 	protected JOptionPane tuto;
 	private static final ImageIcon iconTour1 = new ImageIcon("Tour1.png");
+	private static final ImageIcon iconTour2 = new ImageIcon("Tour2.png");
+	private static final ImageIcon iconTour3 = new ImageIcon("Tour3.png");
+	private static final ImageIcon iconTour4 = new ImageIcon("Tour4.png");
 	private static final ImageIcon iconPiege1 = new ImageIcon("Piege1.png");
+	private static final ImageIcon iconPiege2 = new ImageIcon("Piege2.png");
+	private static final ImageIcon iconPiege3 = new ImageIcon("Piege3.png");
 	private static final ImageIcon iconBarriere = new ImageIcon("Barriere.png");
 	private static final ImageIcon iconVie = new ImageIcon("coeur.png");
 	private static final ImageIcon iconStart = new ImageIcon("start.png");
@@ -58,7 +63,7 @@ public class Menu extends JLayeredPane {
 		
 		bizuth = gameur;
 		
-		
+		/* Fenêtre de début du jeu */
 		String[] intro = {"Jouer", "Tutoriel"};
 		debutJeu = new JOptionPane();
 		int rang = debutJeu.showOptionDialog(null, "Salut toi, soit tu joues soit tu te casses !", "Tower Defense !", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, intro, intro[1]);
@@ -68,35 +73,60 @@ public class Menu extends JLayeredPane {
 			tuto.showMessageDialog(null, "Le tower defense est un jeu très simple. L’objectif est d'empêcher des vagues successives d’ennemis de traverser le chemin.\n Tu perdras de la vie à chaque fois qu'un ennemi aura traversé complètement la chemin. Pour combattre les monstres, tu dois \n acheter différents pièges ou tours défensives avec l'argent que tu as gagné au cours de la partie en tuant des ennemis. Le jeu se \n présente sous forme de niveaux de plus en plus difficiles. A toi de faire tes preuves ! ", "Tutoriel", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
-		MesTours = new JButton[4];
-		for(int i = 0; i< MesTours.length; i++){
-			int a = i+1;
-			MesTours[i] = new JButton("Tour " +a, iconTour1);
+		/* INIT des boutons des tours */
+		
+		MesTours = new JButton[4];			
+			
+		MesTours[0] = new JButton("Tour 1", iconTour1);
+		MesTours[0].setToolTipText("<html>Cette tour a une portée raisonnable et cause des dégats moyens.<br/>" +
+										"Son prix est de 200$.</html>");
+										
+		MesTours[1] = new JButton("Tour 2", iconTour2);
+		MesTours[1].setToolTipText("<html>Cette tour a une portée ... et cause des dégats ....<br/>" +
+										"Son prix est de ...$.</html>");
+			
+		MesTours[2] = new JButton("Tour 3", iconTour3);
+		MesTours[2].setToolTipText("<html>Cette tour a une portée ... et cause des dégats ....<br/>" +
+										"Son prix est de ...$.</html>");
+			
+		MesTours[3] = new JButton("Tour 4", iconTour4);
+		MesTours[3].setToolTipText("<html>Cette tour a une portée ... et cause des dégats ....<br/>" +
+										"Son prix est de ...$.</html>");
+										
+		for(int i=0; i<MesTours.length; i++){
 			MonSousMenuTour.add(MesTours[i]);
 			MesTours[i].addActionListener(new BDefense());
-		}
+		}	
+		
+		
+		/* INIT des boutons des pièges */
 		
 		MesPieges = new JButton[4];
+		
 		MesPieges[0] = new JButton("Barriere", iconBarriere);
-			MonSousMenuTour.add(MesPieges[0]);
-			MesPieges[0].addActionListener(new BDefense());
-			MesPieges[0].setToolTipText("<html>Une barriere que les ennemis ne peuvent pas traverser vivants.<br/>" +
+		MesPieges[0].setToolTipText("<html>Une barriere que les ennemis ne peuvent pas traverser vivants.<br/>" +
 										"Ne peut etre placee que sur un bord droit ou gauche du chemin,<br/>" +
 										"ou a la suite d'une autre barriere.<br/>" +
 										"Ne peut pas obstruer totalement le chemin.</html>");
-		for(int i = 1; i< MesPieges.length; i++){
-			int a = i+1;
-			MesPieges[i] = new JButton("Piege " +a, iconPiege1);
+										
+		MesPieges[1] = new JButton("Piege 1", iconPiege1);
+			
+		MesPieges[2] = new JButton("Piege 2", iconPiege2);
+			
+		MesPieges[3] = new JButton("Piege 3", iconPiege3);
+			
+										
+		for(int i = 0; i< MesPieges.length; i++){
 			MonSousMenuTour.add(MesPieges[i]);
 			MesPieges[i].addActionListener(new BDefense());
 		}
 		
+		/* INIT des boutons concernant les attributs joueurs et du jeu */
+		
 		niveau = new JButton("Niveau : " + 0, iconNiveau);
 		vie = new JButton(" PV : " + gameur.vie, iconVie);
 		argent = new JButton("Argent : " + gameur.argent + "$", iconArgent);
-		MonSousMenuJoueur.add(niveau);
-		MonSousMenuJoueur.add(vie);
-		MonSousMenuJoueur.add(argent);
+		
 		
 		start = new JButton(" ", iconStart);
 		start.addActionListener(new BDefense());
@@ -104,6 +134,12 @@ public class Menu extends JLayeredPane {
 		infoJeu = new JLabel("Bonjour à toi mon petit, prépares toi!");
 		infoJeu.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 		infoJeu.setVerticalAlignment(javax.swing.SwingConstants.CENTER);
+		
+		/* Intégration des boutons dans le menu */
+		
+		MonSousMenuJoueur.add(niveau);
+		MonSousMenuJoueur.add(vie);
+		MonSousMenuJoueur.add(argent);
 		MonSousMenuJeu.add(start);
 		MonSousMenuJeu.add(infoJeu);
 		
@@ -165,49 +201,49 @@ public class Menu extends JLayeredPane {
 					infoJeu.setText("Tu n'as pas assez d'argent !");
 				}
 			} else if(nomButton.equals("Tour 2")){
-				if(bizuth.argent >= Tour1.PRIX){
+				if(bizuth.argent >= Tour2.PRIX){
 					setVariable(2);
 					infoJeu.setText("Choisis la position de ta tour !");
 				} else {
 					infoJeu.setText("Tu n'as pas assez d'argent !");
 				}
 			} else if(nomButton.equals("Tour 3")){
-				if(bizuth.argent >= Tour1.PRIX){
+				if(bizuth.argent >= Tour3.PRIX){
 					setVariable(3);
 					infoJeu.setText("Choisis la position de ta tour !");
 				} else {
 					infoJeu.setText("Tu n'as pas assez d'argent !");
 				}
 			} else if(nomButton.equals("Tour 4")){
-				if(bizuth.argent >= Tour1.PRIX){
+				if(bizuth.argent >= Tour4.PRIX){
 					setVariable(4);
 					infoJeu.setText("Choisis la position de ta tour !");
 				} else {
 					infoJeu.setText("Tu n'as pas assez d'argent !");
 				}
 			} else if(nomButton.equals("Barriere")){
-				if(bizuth.argent >= Piege1.PRIX){
+				if(bizuth.argent >= Barriere.PRIX){
 					setVariable(5);
 					infoJeu.setText("Choisis la position de ton piege !");
 				} else {
 					infoJeu.setText("Tu n'as pas assez d'argent !");
 				}
-			} else if(nomButton.equals("Piege 2")){
+			} else if(nomButton.equals("Piege 1")){
 				if(bizuth.argent >= Piege1.PRIX){
 					setVariable(6);
 					infoJeu.setText("Choisis la position de ton piege !");
 				} else {
 					infoJeu.setText("Tu n'as pas assez d'argent !");
 				}
-			} else if(nomButton.equals("Piege 3")){
-				if(bizuth.argent >= Piege1.PRIX){
+			} else if(nomButton.equals("Piege 2")){
+				if(bizuth.argent >= Piege2.PRIX){
 					setVariable(7);
 					infoJeu.setText("Choisis la position de ton piege !");
 				} else {
 					infoJeu.setText("Tu n'as pas assez d'argent !");
 				}
-			} else if(nomButton.equals("Piege 4")){
-				if(bizuth.argent >= Piege1.PRIX){
+			} else if(nomButton.equals("Piege 3")){
+				if(bizuth.argent >= Piege3.PRIX){
 					setVariable(8);
 					infoJeu.setText("Choisis la position de ton piege !");
 				} else {
