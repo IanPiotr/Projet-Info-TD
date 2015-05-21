@@ -633,45 +633,7 @@ public class Fenetre extends JFrame{
 	
 	/* METHODES DE DEBUGAGE */
 	
-	/* Visualisation bordures */
-	private void showBordures(Graphics gb){
-		Case curc = GeneAleat.bordureBas.root;
-		while(curc != null){
-			gb.setColor(Color.green);
-			if(curc.hybride){
-				gb.setColor(Color.blue);
-			}
-			curc.drawCase(gb);
-			curc = curc.next;				
-		}
-		curc = GeneAleat.bordureHaut.root;
-		while(curc != null){
-			gb.setColor(Color.pink);
-			if(curc.hybride){
-				gb.setColor(Color.blue);
-			}
-			curc.drawCase(gb);
-			curc = curc.next;
-		}
-		curc = GeneAleat.bordureGauche.root;
-		while(curc != null){
-			gb.setColor(Color.orange);
-			if(curc.hybride){
-				gb.setColor(Color.blue);
-			}
-			curc.drawCase(gb);
-			curc = curc.next;
-		}
-		curc = GeneAleat.bordureDroite.root;
-		while(curc != null){
-			gb.setColor(Color.red);
-			if(curc.hybride){
-				gb.setColor(Color.blue);
-			}
-			curc.drawCase(gb);
-			curc = curc.next;
-		}
-	}
+	
 	
 	/* Visualisation Rectangle + Arc2D entourant les ennemis */
 	private void showContoursEnnemi(Graphics gb, Ennemis bob){
