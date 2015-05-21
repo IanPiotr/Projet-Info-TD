@@ -23,22 +23,7 @@ public class Tour1 extends Tour{
 
 	public Tour1(Rectangle fenetre, int x, int y){
 		super(nomImage, x, y, PRIX, 5, 200, 0, 1); //tour standard, Focus 1 ennemi
-	}
-	
-	public void tir(long cadence, ListeEnnemis le){
-		int nbFocus = 0;
-		Ennemis curE = le.root;
-			while(curE != null){
-				if(collision(curE) && cadence%4 == 0){
-					if(nbFocus<focus){
-						curE.setVie(puissance);
-						nbFocus++;
-					}
-				}	
-				if(curE != null){
-					curE = curE.next;
-				}
-		}
+		rate = 4;
 	}
 
 }

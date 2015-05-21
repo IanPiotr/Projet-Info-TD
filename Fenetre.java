@@ -147,6 +147,17 @@ public class Fenetre extends JFrame{
 		while(cur2 != null){
 			showPorteeTour(gb, cur2);
 			cur2.draw(gb);
+			
+			
+			gb.setColor(Color.white);
+			for(int i =0; i<cur2.cibles.length; i++){
+				if(cur2.cibles[i] != null && cur2.cibles[i].vie >0 && cur2.aTire>0){
+					gb.drawLine(cur2.getPosx()+cur2.getLargeur()/2, cur2.getPosy()+cur2.getHauteur()/2, cur2.cibles[i].getPosx()+cur2.cibles[i].getLargeur()/2,cur2.cibles[i].getPosy()+cur2.cibles[i].getHauteur()/2);
+					cur2.aTire--;
+				}
+			}
+			
+			
 			cur2 = cur2.next;
 		}
 		/* PEINTURE BARRIERES */

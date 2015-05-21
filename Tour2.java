@@ -23,23 +23,8 @@ public class Tour2 extends Tour{
 
 	public Tour2(Rectangle fenetre, int x, int y){
 		super(nomImage, x, y, PRIX, 40, 250, 0, 10); //Tour fusil a pompe
+		rate=75;
 
-	}
-
-	public void tir(long cadence, ListeEnnemis le){
-		int nbFocus = 0;
-		Ennemis curE = le.root;
-			while(curE != null){
-				if(collision(curE) && cadence%75 == 0){
-					if(nbFocus<focus){
-						curE.setVie(puissance);
-						nbFocus++;
-					}
-				}	
-				if(curE != null){
-					curE = curE.next;
-				}
-		}
 	}
 
 }

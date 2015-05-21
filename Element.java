@@ -30,6 +30,14 @@ public abstract class Element {
 		return posy;
 	}
 	
+	public int getLargeur(){
+		return largeur;
+	}
+	
+	public int getHauteur(){
+		return hauteur;
+	}
+	
 	public void setPosx(int x){
 		posx = x;
 		cadre.setLocation(getPosx(), getPosy());
