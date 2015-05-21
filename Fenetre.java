@@ -440,7 +440,7 @@ public class Fenetre extends JFrame{
 							if(!tabCases[i][j+1].isChemin() || !tabCases[i][j-1].isChemin() || !tabCases[i+1][j+1].isChemin() || !tabCases[i+1][j-1].isChemin() || (tabCases[i-1][j].isChemin() && tabCases[i+2][j].isChemin())){
 								pose = false;
 							} else {
-								listeBarrieres.insertTete(new Barriere(x+5, y+3, chemin, tabCases));
+								listeBarrieres.insertTete(new Barriere(x+5, y+3, tabCases));
 								bizuth.argent -= Barriere.PRIX;
 								menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 								str = "Barriere";
@@ -635,7 +635,7 @@ public class Fenetre extends JFrame{
 	
 	/* Visualisation bordures */
 	private void showBordures(Graphics gb){
-		Case curc = chemin.bordureBas.root;
+		Case curc = GeneAleat.bordureBas.root;
 		while(curc != null){
 			gb.setColor(Color.green);
 			if(curc.hybride){
@@ -644,7 +644,7 @@ public class Fenetre extends JFrame{
 			curc.drawCase(gb);
 			curc = curc.next;				
 		}
-		curc = chemin.bordureHaut.root;
+		curc = GeneAleat.bordureHaut.root;
 		while(curc != null){
 			gb.setColor(Color.pink);
 			if(curc.hybride){
@@ -653,7 +653,7 @@ public class Fenetre extends JFrame{
 			curc.drawCase(gb);
 			curc = curc.next;
 		}
-		curc = chemin.bordureGauche.root;
+		curc = GeneAleat.bordureGauche.root;
 		while(curc != null){
 			gb.setColor(Color.orange);
 			if(curc.hybride){
@@ -662,7 +662,7 @@ public class Fenetre extends JFrame{
 			curc.drawCase(gb);
 			curc = curc.next;
 		}
-		curc = chemin.bordureDroite.root;
+		curc = GeneAleat.bordureDroite.root;
 		while(curc != null){
 			gb.setColor(Color.red);
 			if(curc.hybride){
