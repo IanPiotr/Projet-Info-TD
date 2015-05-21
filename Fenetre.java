@@ -440,7 +440,7 @@ public class Fenetre extends JFrame{
 							if(!tabCases[i][j+1].isChemin() || !tabCases[i][j-1].isChemin() || !tabCases[i+1][j+1].isChemin() || !tabCases[i+1][j-1].isChemin() || (tabCases[i-1][j].isChemin() && tabCases[i+2][j].isChemin())){
 								pose = false;
 							} else {
-								listeBarrieres.insertTete(new Barriere(x+5, y+3, tabCases));
+								listeBarrieres.insertTete(new Barriere(x+5, y+3, tabCases, chemin));
 								bizuth.argent -= Barriere.PRIX;
 								menuTest.argent.setText("Argent : " + bizuth.argent + "$");
 								str = "Barriere";
