@@ -112,7 +112,7 @@ public class Fenetre extends JFrame{
 		
 		chemin = new Chemin(tabCases);
 		try {
-			background = ImageIO.read(new File("Background.png"));
+			background = ImageIO.read(new File("Background.jpg"));
 			System.out.println("background charge"); 
         } catch(Exception err){
 			System.out.println("background non trouvé"); 
