@@ -28,6 +28,12 @@ public class Case extends Rectangle{
 		hybride = false;
 		barriere = false;
 		next = null;
+		try {
+			image = ImageIO.read(new File("caseLambda.png"));
+        } catch(Exception err){
+			System.out.println("caseLambda.png introuvable !");            
+            System.exit(0);    
+       }
 	}
 	
 	public Case(int posx, int posy, boolean isCh, boolean isOccup){
@@ -46,8 +52,7 @@ public class Case extends Rectangle{
 	}
 		
 	public void drawCase(Graphics g){
-		//g.fillRect(x, y, width, height);
-		if(image != null) g.drawImage(image, x, y,null);
+		g.drawImage(image, x, y,null);
 	}
 	
 	public void setChemin(boolean ch){
@@ -74,7 +79,7 @@ public class Case extends Rectangle{
 		try {
 			image = ImageIO.read(new File(nomImage));
 		} catch(Exception err){
-			System.out.println("Image non trouvee !!!"); 
+			System.out.println(nomImage + " non trouvee."); 
 			image = null;  
 		}
 	}

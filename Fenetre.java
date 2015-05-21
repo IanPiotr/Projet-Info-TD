@@ -89,7 +89,7 @@ public class Fenetre extends JFrame{
 		menuTest.getStart().addActionListener(new EcouteurBoutonStart());
 		
         /* INIT TIMERS */
-        timer = new Timer(15, new letsDance());
+        timer = new Timer(15, new letsDance());	//15
         spawn = new Timer(600, new letsSpawn());
         
         /* INIT NIVEAU */
@@ -148,7 +148,7 @@ public class Fenetre extends JFrame{
 			showPorteeTour(gb, cur2);
 			cur2.draw(gb);
 			
-			
+			//affichage des tirs
 			gb.setColor(Color.white);
 			for(int i =0; i<cur2.cibles.length; i++){
 				if(cur2.cibles[i] != null && cur2.cibles[i].vie >0 && cur2.aTire>0){
@@ -653,7 +653,7 @@ public class Fenetre extends JFrame{
 	
 	/* Visualisation Arc2D portee des tours */
 	private void showPorteeTour(Graphics gb, Tour eiffel){
-		gb.setColor(Color.white);
+		gb.setColor(Color.darkGray);
 		gb.drawArc(eiffel.getPosx()-(int)eiffel.portee.getWidth()/2 + eiffel.cadre.width/2, eiffel.getPosy()-(int)eiffel.portee.getHeight()/2+ eiffel.cadre.height/2, (int)eiffel.portee.getWidth(), (int)eiffel.portee.getHeight(), 0, 360);
 	}
     
