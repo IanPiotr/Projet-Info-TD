@@ -6,9 +6,22 @@ public class ListeTour{
 		root = null;
 	}
 	
+	/*METHODE INSERTION EN TETE DERRIERE PIEGE 3*/
 	public void insertTete(Tour tour){
-		tour.next = root;
-        root = tour;
+		Tour prev = root;
+		Tour cur = null;
+		
+		if(prev != null){
+			cur = prev.next;
+			while(cur != null && cur instanceof Piege3){
+				prev = cur;
+				cur = cur.next;
+			}
+			prev.next = tour;
+			tour.next = cur;
+		} else {
+			root = tour;
+		}
     }
     
     public void supprTete(){

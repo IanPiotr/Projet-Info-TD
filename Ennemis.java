@@ -32,6 +32,9 @@ public class Ennemis extends Element{
 	public static final String nomImage2 = "Sbire2.png";
 	public static final String nomImage3 = "Sbire3.png";
 	public int upgrade;
+	private int recompense;
+	protected boolean estRalenti;
+	private boolean beni;
 	
 	public Ennemis(){
 		super();
@@ -58,15 +61,19 @@ public class Ennemis extends Element{
 		switch(upgrade){
 			case 4 :
 				nomImage = SbireFantome.nomFantome;
+				recompense = 100;
 				break;
 			case 3 :
 				nomImage = nomImage3;
+				recompense = 50;
 				break;
 			case 2 :
 				nomImage = nomImage2;
+				recompense = 30;
 				break;
 			default :
 				nomImage = nomImage1;
+				recompense = 10;
 		}
 		try {
 			image = ImageIO.read(new File(nomImage));
@@ -120,6 +127,30 @@ public class Ennemis extends Element{
 	
 	public void setVitesse(int vit){
 		vitesse = vit;
+	}
+	
+	public boolean isRalenti(){
+		return estRalenti;
+	}
+	
+	public void setRalenti(boolean ral){
+		estRalenti = ral;
+	}
+	
+	public boolean isBeni(){
+		return beni;
+	}
+	
+	public void setBeni(boolean b){
+		beni = b;
+	}
+	
+	public int getRecompense(){
+		return recompense;
+	}
+	
+	public void setRecompense(int gain){
+		recompense = gain;
 	}
 	
 	public int getVie(){
@@ -381,7 +412,7 @@ public class Ennemis extends Element{
 	 * Les ennemis doivent donc toujours essayer de descendre (dposy = 1) sauf si rebond
 	 * Pas de rebonds sur une case hybride, puisqu'on sait qu'on va pouvoir descendre sous peu
 	 */
-	public void moveChemin(Case[][] tabCases, ListeCases lg, ListeCases ld, ListeCases lh, ListeCases lb/*, ListeElement lbar*/){
+	public void moveChemin(Case[][] tabCases, ListeCases lg, ListeCases ld, ListeCases lh, ListeCases lb){
 		 	//Nouvelle potentielle position
 		setPos(posx + (int)(vitesse*dposx), posy + (int)(dposy*vitesse));
 		

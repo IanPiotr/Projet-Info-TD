@@ -25,6 +25,22 @@ public class ListeEnnemis{
 			root = ennem;
 		}
 	}
+	
+	public void insertFantome(Ennemis ennem){
+		Ennemis prev = root;
+		Ennemis cur;
+		if(prev != null){
+			cur = prev.next;
+			while(cur != null && cur.upgrade == 4){
+				prev = cur;
+				cur = cur.next;
+			}
+			prev.next = ennem;
+			ennem.next = cur;
+		} else {
+			root = ennem;
+		}
+	}
 		
     
     public void supprTete(){
