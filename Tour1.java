@@ -23,7 +23,7 @@ public class Tour1 extends Tour{
 
 	public Tour1(Rectangle fenetre, int x, int y){
 		super(nomImage, x, y, PRIX, 5, 200, 0, 1); //tour standard, Focus 1 ennemi
-		rate = 4;
+		rate =4;
 	}
-
+	
 }

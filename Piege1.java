@@ -22,7 +22,7 @@ public class Piege1 extends Tour{
 					nbFocus++;
 				}
 			//Si ni nous ni quelqu'un d'autre ne le ralentissons, il gagne le droit de reprendre sa vitesse normale :
-			} else if(!curE.isRalenti()){
+			} else if(!curE.isRalenti() && !(curE instanceof SbireFantome)){
 				curE.setVitesse(2);
 			}
 				

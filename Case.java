@@ -79,7 +79,7 @@ public class Case extends Rectangle{
 		try {
 			image = ImageIO.read(new File(nomImage));
 		} catch(Exception err){
-			System.out.println(nomImage + " non trouvee."); 
+			System.out.println(nomImage + " non trouvee!"); 
 			image = null;  
 		}
 	}

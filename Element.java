@@ -30,14 +30,6 @@ public abstract class Element {
 		return posy;
 	}
 	
-	public int getLargeur(){
-		return largeur;
-	}
-	
-	public int getHauteur(){
-		return hauteur;
-	}
-	
 	public void setPosx(int x){
 		posx = x;
 		cadre.setLocation(getPosx(), getPosy());
@@ -52,6 +44,14 @@ public abstract class Element {
 		posx = x;
 		posy = y;
 		cadre.setLocation(getPosx(), getPosy());
+	}
+	
+	public int getLargeur(){
+		return largeur;
+	}
+	
+	public int getHauteur(){
+		return hauteur;
 	}
 	
 	public void draw(Graphics g){

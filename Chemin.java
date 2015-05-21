@@ -200,7 +200,7 @@ public class Chemin{
 						if(somme==1 || somme==5){ //haut gauche
 							tabCases[i][j].setImage(nomImHautGauche);
 						}else if(somme==2 ||somme==18){	//haut droite
-								tabCases[i][j].setImage(nomImHautDroite);
+							tabCases[i][j].setImage(nomImHautDroite);
 						}
 						
 					}else{				//cas des autres lignes
@@ -251,7 +251,12 @@ public class Chemin{
 								tabCases[i][j].setImage(nomImHautBas);		
 							}	
 						}
-					}				
+					}
+					
+					if(j==0){
+					System.out.println("i = " +i+ "j = "+j + " somme = " + somme);
+					}
+					
 				}
 			}
 		}

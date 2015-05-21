@@ -31,7 +31,7 @@ public class ListeEnnemis{
 		Ennemis cur;
 		if(prev != null){
 			cur = prev.next;
-			while(cur != null && cur.upgrade == 4){
+			while(cur != null && cur instanceof SbireFantome){
 				prev = cur;
 				cur = cur.next;
 			}

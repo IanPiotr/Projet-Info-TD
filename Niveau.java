@@ -3,7 +3,7 @@ import java.awt.Rectangle;
 public class Niveau{
 
 	private int nbEnnemis;
-	private static final int ENNEMIS_DE_BASE = 9;
+	private static final int ENNEMIS_DE_BASE = 3;
 	private static final int ENNEMIS_PAR_NIVEAU = 1;
 	private static final int VIE_ENNEMIS_BASE = 70;
 	private static final int VIE_ENNEMIS_PAR_NIVEAU = 10;
@@ -42,7 +42,18 @@ public class Niveau{
 	}
 	
 	public Ennemis genererEnnemi(int numSpawn, Rectangle ecran){
-		return new Ennemis(ecran, matriceC[0][numSpawn], matriceC[1][numSpawn], matriceC[2][numSpawn], matriceC[3][numSpawn], matriceC[4][numSpawn]);
+		switch(matriceC[0][numSpawn]){
+			case 1 :
+				return new Sbire1(ecran, matriceC[1][numSpawn], matriceC[2][numSpawn], matriceC[3][numSpawn], matriceC[4][numSpawn]);
+			case 2 :
+				return new Sbire2(ecran, matriceC[1][numSpawn], matriceC[2][numSpawn], matriceC[3][numSpawn], matriceC[4][numSpawn]);
+			case 3 :
+				return new Sbire3(ecran, matriceC[1][numSpawn], matriceC[2][numSpawn], matriceC[3][numSpawn], matriceC[4][numSpawn]);
+			default :
+				System.out.println("DEFAUT DE CREATION ENNEMIS");
+				System.exit(0);
+				return null;
+		}
 	}
 	
 	/* METHODES DIVERGENTES DE GENERATION COEFFICIENTS MATRICE 
@@ -84,17 +95,17 @@ public class Niveau{
 		int base = 0;
 		switch(matriceC[0][numSpawn]){
 			case 1 :
-				vie = 60;
+				vie = Sbire1.VIE_MIN;
 				probaMax = 40;
 				base = 50;
 				break;
 			case 2 :
-				vie = 150;
+				vie = Sbire2.VIE_MIN;
 				probaMax = 70;
 				base = 30;
 				break;
 			case 3 :
-				vie = 10;
+				vie = Sbire3.VIE_MIN;
 				probaMax = 80;
 				base = 80;
 				break;

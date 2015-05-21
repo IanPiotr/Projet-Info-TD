@@ -16,7 +16,7 @@ public class Barriere extends Element{
 	public static final int PRIX = 200;
 	//protected Barriere next;
 
-	public Barriere(int px, int py, Case[][] tabCases, Chemin chemin){
+	public Barriere(int px, int py, Chemin chemin, Case[][] tabCases){
 		super();
 		
 		try {

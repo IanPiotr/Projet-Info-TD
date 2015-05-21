@@ -23,6 +23,7 @@ public abstract class Tour extends Element {
 	public Ennemis[] cibles;
 	protected int rate;	//cadence de tir
 	public int aTire;	//durée d'affichage du tir (en tours de boucles)
+	
 	public Tour(String nomImage, int px, int py, int cout, int force, int range, int c, int nbFocus){
 		super();
 		
@@ -38,7 +39,7 @@ public abstract class Tour extends Element {
 		prix = cout;
 		puissance = force;
 		coeffVit = c;
-		focus=nbFocus;
+		focus = nbFocus;
 		cibles = new Ennemis[focus];
 		aTire = 0;
 		
@@ -49,7 +50,6 @@ public abstract class Tour extends Element {
 		
 		cadre = new Rectangle(posx, posy, largeur, hauteur);
 		portee = new Arc2D.Double(posx - range/2 + largeur/2, posy - range/2 + hauteur/2, range, range, 0, 360, Arc2D.OPEN);
-		
 	}
 	
 	/*REDEFINITION DE LA METHODE COLLISION DE ELEMENT
@@ -59,10 +59,11 @@ public abstract class Tour extends Element {
 	public boolean collision(Element elem){
 		return this.portee.intersects(elem.cadre);
 	}
+	//*//
 	
 	public void tir(long cadence, ListeEnnemis le){
-	int nbFocus = 0;
-	Ennemis curE = le.root;
+		int nbFocus = 0;
+		Ennemis curE = le.root;
 		while(curE != null){
 			if(collision(curE) && cadence%rate == 0){
 				aTire = 7;
@@ -75,10 +76,7 @@ public abstract class Tour extends Element {
 			if(curE != null){
 				curE = curE.next;
 			}
+		}
 	}
-}
-		
-	
-	
 }
 

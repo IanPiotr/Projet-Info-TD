@@ -24,7 +24,7 @@ public class Menu extends JLayeredPane {
 	private JButton [] MesTours;
 	private JButton [] MesPieges;
 	private JButton start;
-	private JButton niveau;
+	protected JButton niveau;
 	protected JButton argent;
 	protected JButton vie;
 	protected JLabel infoJeu; // permet de donner des infos au joueur durant le jeu

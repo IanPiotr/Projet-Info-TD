@@ -23,8 +23,7 @@ public class Tour3 extends Tour{
 
 	public Tour3(Rectangle fenetre, int x, int y){
 		super(nomImage, x, y, PRIX, 1, 200, 0, 10); //tour acide
-		rate=1;
-
+		rate = 1;
 	}
 
 }

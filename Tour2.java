@@ -22,9 +22,8 @@ public class Tour2 extends Tour{
 	public static final int PRIX = 200;
 
 	public Tour2(Rectangle fenetre, int x, int y){
-		super(nomImage, x, y, PRIX, 40, 250, 0, 10); //Tour fusil a pompe
-		rate=75;
-
+		super(nomImage, x, y, PRIX, 50, 250, 0, 10); //Tour fusil a pompe
+		rate = 75;
 	}
 
 }

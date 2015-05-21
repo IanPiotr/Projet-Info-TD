@@ -1,10 +1,7 @@
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.geom.RectangularShape.*;
 import java.awt.geom.*;
-import java.awt.geom.Arc2D.Double;
-import java.awt.geom.Arc2D.*;
 
 import java.io.File;
 
@@ -15,7 +12,7 @@ import javax.swing.event.EventListenerList;
 import java.awt.Color;
 
 
-public class Ennemis extends Element{
+public abstract class Ennemis extends Element{
 
 	public int IDEnnemi;
 	protected int vie;
@@ -28,13 +25,11 @@ public class Ennemis extends Element{
 	public Ennemis next;
 	protected boolean enBas;
 	protected int buteeBas;
-	public static final String nomImage1 = "Sbire1.png";
-	public static final String nomImage2 = "Sbire2.png";
-	public static final String nomImage3 = "Sbire3.png";
-	public int upgrade;
-	private int recompense;
+	protected int recompense;
 	protected boolean estRalenti;
 	private boolean beni;
+	public String nomImage;
+	public String nomImageReverse;
 	
 	public Ennemis(){
 		super();
@@ -43,9 +38,11 @@ public class Ennemis extends Element{
 		dposx = 0;
 		dposy = 1;
 		vitesse = 2;
+		estRalenti = false;
+		beni = false;
 	}
 
-	public Ennemis(Rectangle fenetre, int upRef, int num, int px, int py, int hp){
+	public Ennemis(Rectangle fenetre, int num, int px, int py, int hp, String img){
 		this();
 		
         IDEnnemi = num;
@@ -55,41 +52,20 @@ public class Ennemis extends Element{
 
 		vie = hp;
 		
-		upgrade = upRef;
-		
-		String nomImage;
-		switch(upgrade){
-			case 4 :
-				nomImage = SbireFantome.nomFantome;
-				recompense = 100;
-				break;
-			case 3 :
-				nomImage = nomImage3;
-				recompense = 50;
-				break;
-			case 2 :
-				nomImage = nomImage2;
-				recompense = 30;
-				break;
-			default :
-				nomImage = nomImage1;
-				recompense = 10;
-		}
 		try {
-			image = ImageIO.read(new File(nomImage));
+			image = ImageIO.read(new File(img));
         } catch(Exception err){
-			System.out.println(nomImage+" introuvable !");            
+			System.out.println(img+" introuvable !");            
             System.exit(0);    
         }
-        
-		limEcran = fenetre;	//meme pointeur, c'est ce qu'il me faut
-		buteeBas = limEcran.height;
-		
-		largeur = image.getWidth(null);
+        largeur = image.getWidth(null);
 		hauteur = image.getHeight(null);
 		
 		cadre = new Rectangle(posx, posy, largeur, hauteur);
 		cercle = new Arc2D.Double(cadre, 0, 360, Arc2D.OPEN);
+        
+		limEcran = fenetre;	//meme pointeur, c'est ce qu'il me faut
+		buteeBas = limEcran.height;
 
 	}
 	
@@ -127,6 +103,17 @@ public class Ennemis extends Element{
 	
 	public void setVitesse(int vit){
 		vitesse = vit;
+	}
+	
+	public abstract void setDposx(int dx);
+	
+	public void setImage(String img){
+		try {
+			image = ImageIO.read(new File(img));
+        } catch(Exception err){
+			System.out.println(img+" introuvable !");            
+            System.exit(0);    
+        }
 	}
 	
 	public boolean isRalenti(){
@@ -421,7 +408,7 @@ public class Ennemis extends Element{
 				//Mur de GAUCHE
 		cur = lg.root;
 		while(cur != null){
-			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
+			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && !(this instanceof SbireFantome)))){
 			//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
 				//Cas de la case bordure GAUCHE et BAS, s'il a en fait tape en BAS
 				if(cur.hybride && cadre.y + cadre.height <= cur.y + 4){ //Ce 4 (bug constate avec 3) représente la penetration possible du sbire dans la case bordure
@@ -430,10 +417,10 @@ public class Ennemis extends Element{
 					if(!enBas){
 						int j = (int)((posy + hauteur)/Case.LCASE);
 						int imax = (int)(posx/Case.LCASE);
-						dposx = 1;
+						setDposx(1);
 						for(int i = 0 ; i <= imax ; i++){
 							if(tabCases[i][j].isChemin()){
-								dposx = -1;
+								setDposx(-1);
 								break;
 							}
 						}
@@ -443,7 +430,7 @@ public class Ennemis extends Element{
 				} else {
 					setPosx(cur.x + cur.width);
 					if(!cur.hybride){	//Pour eviter un rebond inutil lorsque case hybride g/h
-						dposx = 1;
+						setDposx(1);
 					}
 				}
 			}
@@ -455,7 +442,7 @@ public class Ennemis extends Element{
 				//puisque les ennemis ne peuvent que descendre
 		cur = ld.root;
 		while(cur != null){
-			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
+			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && !(this instanceof SbireFantome)))){
 			//Cas particulier de la case faisant un angle (ennemis deplace potentiellement deux fois sinon)
 				//Cas de la case DROITE et BAS, s'il a en fait tape en BAS
 				if(cur.hybride && cadre.y + cadre.height <= cur.y + 4){
@@ -464,10 +451,10 @@ public class Ennemis extends Element{
 					if(!enBas){
 						int j = (int)((posy + hauteur)/Case.LCASE);
 						int imax = (int)(posx/Case.LCASE);
-						dposx = 1;
+						setDposx(1);
 						for(int i = 0 ; i <= imax ; i++){
 							if(tabCases[i][j].isChemin()){
-								dposx = -1;
+								setDposx(-1);
 								break;
 							}
 						}
@@ -478,7 +465,7 @@ public class Ennemis extends Element{
 					setPosx(cur.x - cadre.width);
 					//Pour eviter un rebond inutil lorsque case hybride d/h
 					if(!cur.hybride){
-						dposx = -1;
+						setDposx(-1);
 					}
 				}
 			}
@@ -487,17 +474,17 @@ public class Ennemis extends Element{
 				//Mur du BAS
 		cur = lb.root;
 		while(cur != null){
-			if(cur.intersects(cadre) && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
+			if(cur.intersects(cadre) && ((!cur.isBarriere()) || (cur.isBarriere() && !(this instanceof SbireFantome)))){
 				buteeBas = cur.y;
 				setPosy(cur.y - cadre.height);
 				//Si on vient de taper en bas, on regarde de quel cote on doit partir
 				if(!enBas){
 					int j = (int)((posy + hauteur)/Case.LCASE);
 					int imax = (int)(posx/Case.LCASE);
-					dposx = 1;
+					setDposx(1);
 					for(int i = 0 ; i <= imax ; i++){
 						if(tabCases[i][j].isChemin()){
-							dposx = -1;
+							setDposx(-1);
 							break;
 						}
 					}
@@ -511,7 +498,7 @@ public class Ennemis extends Element{
 				//Sauf si rebonds
 		cur = lh.root;
 		while(cur != null){
-			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && upgrade != 4))){
+			if(cur.intersects(cadre)  && ((!cur.isBarriere()) || (cur.isBarriere() && !(this instanceof SbireFantome)))){
 				setPosy(cur.y + cur.height);
 				dposy = 1;
 				System.out.println("YOLO");

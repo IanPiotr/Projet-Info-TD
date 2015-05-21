@@ -89,7 +89,7 @@ public class Fenetre extends JFrame{
 		menuTest.getStart().addActionListener(new EcouteurBoutonStart());
 		
         /* INIT TIMERS */
-        timer = new Timer(15, new letsDance());	//15
+        timer = new Timer(15, new letsDance());
         spawn = new Timer(600, new letsSpawn());
         
         /* INIT NIVEAU */
@@ -112,7 +112,7 @@ public class Fenetre extends JFrame{
 		
 		chemin = new Chemin(tabCases);
 		try {
-			background = ImageIO.read(new File("Background.jpg"));
+			background = ImageIO.read(new File("Background.png"));
 			System.out.println("background charge"); 
         } catch(Exception err){
 			System.out.println("background non trouvé"); 
@@ -147,17 +147,15 @@ public class Fenetre extends JFrame{
 		while(cur2 != null){
 			showPorteeTour(gb, cur2);
 			cur2.draw(gb);
-			
 			//affichage des tirs
 			gb.setColor(Color.white);
 			for(int i =0; i<cur2.cibles.length; i++){
 				if(cur2.cibles[i] != null && cur2.cibles[i].vie >0 && cur2.aTire>0){
 					gb.drawLine(cur2.getPosx()+cur2.getLargeur()/2, cur2.getPosy()+cur2.getHauteur()/2, cur2.cibles[i].getPosx()+cur2.cibles[i].getLargeur()/2,cur2.cibles[i].getPosy()+cur2.cibles[i].getHauteur()/2);
 					cur2.aTire--;
+					cur2.cibles[i] = null;
 				}
 			}
-			
-			
 			cur2 = cur2.next;
 		}
 		/* PEINTURE BARRIERES */
@@ -181,7 +179,7 @@ public class Fenetre extends JFrame{
         
     }
     
-    /* CALCULS DEPLACEMENTS ENNEMIS  */
+    /* CALCULS DEPLACEMENTS ENNEMIS */
     public class letsDance implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			boucle();
@@ -250,7 +248,7 @@ public class Fenetre extends JFrame{
 				//Si l'ennemi courant est coince par un ennemi plus vieux, on recule jusqu'a la FIN de l'intersection,
 				//pour etre sur de ne jamais chevaucher un autre ennemi a la fin du deplacement
 				//Exception pour les sbireFantomes d'upgrade = 4
-				while(prev.collision(cur) && cur.upgrade != 4 && prev.upgrade != 4){
+				while(prev.collision(cur) && !(cur instanceof SbireFantome) && !(prev instanceof SbireFantome)){
 					cur.moveBasique(true, true);
 					aquecollision = true;
 				}
@@ -366,14 +364,9 @@ public class Fenetre extends JFrame{
         /* INIT BARRIERES */
         listeBarrieres = new ListeElement();
         
-		
         /* INIT TIMERS */
         timer.stop();
         spawn.stop();
-        
-        /* INIT MENU */
-        menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-        menuTest.vie.setText("PV : " + bizuth.vie);
         
         /* INIT NIVEAU */
         niveau = 0;
@@ -381,6 +374,29 @@ public class Fenetre extends JFrame{
 		level = new Niveau(niveau, 15*Case.LCASE, 19*Case.LCASE);
 		enCours = false;
 		niveauReady = true;
+        
+        /* INIT MENU */
+        menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+        menuTest.vie.setText("PV : " + bizuth.vie);
+        menuTest.niveau.setText("Niveau: " + niveau);
+        
+        
+		
+		/* INIT QUADRILAGE DE LA CARTE
+         * Uniquement sur la zone jouable
+         * Remise a zero des attributs booleens
+         */
+        for(int i=0; i<tabCases.length; i++){
+			for(int j=0; j<tabCases[0].length;j++){
+				tabCases[i][j].setChemin(false);
+				tabCases[i][j].setBarriere(false);
+				tabCases[i][j].setHybride(false);
+				tabCases[i][j].setOccupe(false);
+				tabCases[i][j].setBordure(false);
+				tabCases[i][j].setImage(null);
+			}
+		}
+		chemin = new Chemin(tabCases);
 		
 		repaint();
 	}
@@ -408,7 +424,7 @@ public class Fenetre extends JFrame{
 			if(!tabCases[i][j].isOccupe()){
 				if(boutonSouris == e.BUTTON1){
 					//Pour ne pas placer une tour hors de la zone de jeu :
-					if(e.getX() < ecran.width - 12 && e.getY() < ecran.height - 25)					
+					if(i < tabCases.length && j < tabCases[0].length - 1 && j > 0){
 					switch(menuTest.getVariable()){
 						//NB : 	les objets sont places au centre des cases
 						case 1:
@@ -447,14 +463,42 @@ public class Fenetre extends JFrame{
 								pose = false;
 							}
 						
-						case 5:
-							if(!tabCases[i][j+1].isChemin() || !tabCases[i][j-1].isChemin() || !tabCases[i+1][j+1].isChemin() || !tabCases[i+1][j-1].isChemin() || (tabCases[i-1][j].isChemin() && tabCases[i+2][j].isChemin())){
-								pose = false;
+						case 5:	//Barriere
+								//A noter que les verifications se font dans un ordre precis limitant la multiplication des cas
+							//SI on veut placer une barriere sur la gauche du chemin
+							if(tabCases[i][j].isChemin() && !tabCases[i-1][j].isChemin() && tabCases[i+1][j].isChemin() && i < tabCases.length-2 && j > 2 && j< tabCases[0].length-2){
+								//SI il y a la place pour que les ennemis passent en haut
+								if(tabCases[i+2][j].isChemin() && tabCases[i+3][j].isChemin() && tabCases[i+2][j-1].isChemin() && tabCases[i+3][j-1].isChemin() && tabCases[i+2][j-2].isChemin() && tabCases[i+3][j-2].isChemin() || (!tabCases[i][j-1].isChemin() && !tabCases[i+1][j-1].isChemin() || (!tabCases[i][j-2].isChemin() && !tabCases[i+1][j-2].isChemin()))){
+									//SI il y a la place pour que les ennemis passent en bas
+									if(tabCases[i+2][j+1].isChemin() && tabCases[i+3][j+1].isChemin() && tabCases[i+2][j+2].isChemin() && tabCases[i+3][j+2].isChemin() || (!tabCases[i][j+1].isChemin() && !tabCases[i+1][j+1].isChemin() || (!tabCases[i][j+2].isChemin() && !tabCases[i+1][j+2].isChemin()))){
+										listeBarrieres.insertTete(new Barriere(x+5, y+3, chemin, tabCases));
+										bizuth.argent -= Barriere.PRIX;
+										menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+										str = "Barriere";
+									} else {
+										pose = false;
+									}
+								} else {
+									pose = false;
+								}
+							//SINON SI on veut placer une barriere sur la droite du chemin
+							} else if(tabCases[i][j].isChemin() && !tabCases[i+1][j].isChemin() && tabCases[i-1][j].isChemin() && i > 2 && j > 2 && j< tabCases[0].length-2){
+								//SI il y a la place pour que les ennemis passent en haut
+								if(tabCases[i-2][j].isChemin() && tabCases[i-3][j].isChemin() && tabCases[i-2][j-1].isChemin() && tabCases[i-3][j-1].isChemin() && tabCases[i-2][j-2].isChemin() && tabCases[i-3][j-2].isChemin() || (!tabCases[i][j-1].isChemin() && !tabCases[i-1][j-1].isChemin() || (!tabCases[i][j-2].isChemin() && !tabCases[i-1][j-2].isChemin()))){
+									//SI il y a la place pour que les ennemis passent en bas
+									if(tabCases[i-2][j+1].isChemin() && tabCases[i-3][j+1].isChemin() && tabCases[i-2][j+2].isChemin() && tabCases[i-3][j+2].isChemin() || (!tabCases[i][j+1].isChemin() && !tabCases[i-1][j+1].isChemin() || (!tabCases[i][j+2].isChemin() && !tabCases[i-1][j+2].isChemin()))){
+										listeBarrieres.insertTete(new Barriere(x-Case.LCASE+5, y+3, chemin, tabCases));
+										bizuth.argent -= Barriere.PRIX;
+										menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+										str = "Barriere";
+									} else {
+										pose = false;
+									}
+								} else {
+									pose = false;
+								}
 							} else {
-								listeBarrieres.insertTete(new Barriere(x+5, y+3, tabCases, chemin));
-								bizuth.argent -= Barriere.PRIX;
-								menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-								str = "Barriere";
+								pose = false;
 							}
 							break;
 							
@@ -485,6 +529,7 @@ public class Fenetre extends JFrame{
 								pose = false;
 							}
 					}
+					} else pose = false;
 					
 					if(menuTest.getVariable() == 6 || menuTest.getVariable() == 7 || menuTest.getVariable() == 8){
 						str = "Piege";
@@ -552,7 +597,7 @@ public class Fenetre extends JFrame{
 			System.out.print("Un ennemi est mort !! ");
 			System.out.println(e.getEnnemi());
 			//Une chance sur 2 pour les ennemis d'upgrade 3 de pouvoir devenir des fantomes !
-			if(e.getEnnemi().upgrade == 3 && (int)(2*Math.random()) == 1){
+			if(e.getEnnemi() instanceof Sbire3 && (int)(2*Math.random()) == 1){
 				SbireFantome sbireFantome = new SbireFantome(ecran, e.getEnnemi().IDEnnemi, e.getEnnemi().posx, e.getEnnemi().posy);
 				sbireFantome.addEnnemiListener(new EcouteurEnnemi());
 				listeEnnemis.insertFantome(sbireFantome); //De cette maniere, les tours tirent en priorite sur les fantomes les plus vieux
@@ -614,17 +659,17 @@ public class Fenetre extends JFrame{
 					JOptionPane level3 = new JOptionPane();
 					level3.showMessageDialog(null, "Felicitations, tu as servecu aux deux premieres vagues !",
 											"Niveau 3", JOptionPane.INFORMATION_MESSAGE);
-					ImageIcon icone = new ImageIcon(Ennemis.nomImage2);
+					ImageIcon icone = new ImageIcon(Sbire2.nomImage);
 					level3.showMessageDialog(null, "L'ennemis n'est pas content, il va maintenant commencer a envoyer des Sbires Verts !" +
 											"\n" + "Attention, ils sont plus resistants que ceux que tu as vu jusqu'a present...",
 											"Niveau 3", JOptionPane.INFORMATION_MESSAGE, icone);
 				} else if(niveau == 6){
-					ImageIcon icone = new ImageIcon(Ennemis.nomImage3);
+					ImageIcon icone = new ImageIcon(Sbire3.nomImage);
 					JOptionPane level7 = new JOptionPane();
 					level7.showMessageDialog(null, "L'ennemi va maintenant pouvoir envoyer des Sbires Rouges," +
 											"\n" + "ses plus fideles combatants !",
 											"Niveau 7", JOptionPane.INFORMATION_MESSAGE, icone);
-					icone = new ImageIcon(SbireFantome.nomFantome);
+					icone = new ImageIcon(SbireFantome.nomImage);
 					level7.showMessageDialog(null, "On raconte que certains d'entres eux sont encore plus terribles dans la mort," +
 											"\n" + "et ne seraient ainsi plus soumis aux memes lois que les vivants...",
 											"Niveau 7", JOptionPane.INFORMATION_MESSAGE, icone);
@@ -643,6 +688,47 @@ public class Fenetre extends JFrame{
     }
 	
 	/* METHODES DE DEBUGAGE */
+	
+	/* Visualisation bordures */
+	private void showBordures(Graphics gb){
+		Case curc = chemin.bordureBas.root;
+		while(curc != null){
+			gb.setColor(Color.green);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
+			curc.drawCase(gb);
+			curc = curc.next;				
+		}
+		curc = chemin.bordureHaut.root;
+		while(curc != null){
+			gb.setColor(Color.pink);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+		curc = chemin.bordureGauche.root;
+		while(curc != null){
+			gb.setColor(Color.orange);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+		curc = chemin.bordureDroite.root;
+		while(curc != null){
+			gb.setColor(Color.red);
+			if(curc.hybride){
+				gb.setColor(Color.blue);
+			}
+			curc.drawCase(gb);
+			curc = curc.next;
+		}
+	}
+	
 	/* Visualisation Rectangle + Arc2D entourant les ennemis */
 	private void showContoursEnnemi(Graphics gb, Ennemis bob){
 		gb.setColor(Color.red);
