@@ -3,10 +3,11 @@ import java.awt.Rectangle;
 public class Piege2 extends Tour{
 	
 	private static final String nomImage = "Piege2.png"; 
-	public static final int PRIX = 100;
+	public static final int PRIX = 500;
+	public static final int RANGE = 200;
 	
 	public Piege2(int x, int y){
-		super(nomImage, x, y, PRIX, 1, 50, 2, 10); //fosse de braises: brûle tous les ennemis dans la zone sans les ralentir
+		super(nomImage, x, y, PRIX, 0, RANGE, 2, 10); //éventuellement presse à monnaie: pas de dégâts ni de ralentissement, mais tous les ennemis tués dans le champ d'action rapportent 2x plus
 		
 	}
 	
@@ -14,12 +15,9 @@ public class Piege2 extends Tour{
 		int nbFocus = 0;
 		Ennemis curE = le.root;
 			while(curE != null){
-				if(collision(curE) && cadence%1 == 0){
-					if(nbFocus<focus){
-						curE.setVie(puissance);
-						nbFocus++;
-					}
-				}	
+				if(collision(curE)){
+					curE.setBeni(true);
+				}
 				if(curE != null){
 					curE = curE.next;
 				}

@@ -17,8 +17,8 @@ public abstract class Ennemis extends Element{
 	public int IDEnnemi;
 	protected int vie;
 	protected int vitesse;
-	public double dposx;
-	public double dposy;
+	public int dposx;
+	public int dposy;
 	protected Arc2D.Double cercle;
 	protected Rectangle limEcran;
 	private final EventListenerList listeners = new EventListenerList();

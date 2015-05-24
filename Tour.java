@@ -35,7 +35,7 @@ public abstract class Tour extends Element {
         }
         posx = px;
         posy = py;
-        
+
 		prix = cout;
 		puissance = force;
 		coeffVit = c;
@@ -63,10 +63,10 @@ public abstract class Tour extends Element {
 	
 	public void tir(long cadence, ListeEnnemis le){
 		int nbFocus = 0;
+		aTire = 7;
 		Ennemis curE = le.root;
 		while(curE != null){
 			if(collision(curE) && cadence%rate == 0){
-				aTire = 7;
 				if(nbFocus<focus){
 					curE.setVie(puissance);
 					cibles[nbFocus] = curE;

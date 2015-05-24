@@ -13,8 +13,7 @@ import javax.imageio.ImageIO;
 public class Barriere extends Element{
 	
 	private static final String nomImage = "Barriere.png";
-	public static final int PRIX = 200;
-	//protected Barriere next;
+	public static final int PRIX = 50;
 
 	public Barriere(int px, int py, Chemin chemin, Case[][] tabCases){
 		super();

@@ -22,8 +22,8 @@ public class Joueur {
 
 	public Joueur(String nomJoueur){
 		
-		argent = 5000; // à déterminer
-		vie = 500; // à déterminer
+		argent = 500; // à déterminer
+		vie = 10; // à déterminer
 		name = nomJoueur; 
 		
 		cadreJoueur = new JPanel();

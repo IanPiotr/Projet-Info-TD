@@ -28,15 +28,9 @@ import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 
-		/* BOGS CONNUS
-			 * Probleme de timer lorsqu'on lance un niveau avant la vraie fin du precedent
-			 * Barrieres peuvent obstruer la totalite du chemin
-			 * Pas de remise a jour des graphismes avant l'apparition des pop-ups (peut-etre pas plus mal...)
-		*/
-
 public class Fenetre extends JFrame{
 
-	//private static final long serialVersionUID = 43L; 
+	//private static final long serialVersionUID = 1L;
 	private Rectangle ecran;
     private BufferedImage monBuf;
     private Image background;
@@ -57,6 +51,10 @@ public class Fenetre extends JFrame{
     private boolean enCours;
     private boolean niveauReady;
     //private boolean pauseDemandee;
+    private boolean dessin;
+    private int x;
+    private int y;
+    private int portee;
 
 	public Fenetre() {
         /* INIT FRAME */
@@ -65,6 +63,10 @@ public class Fenetre extends JFrame{
         setSize(1203,770);
         setResizable(true);
         ecran = new Rectangle(getInsets().left, getInsets().top, getSize().width-getInsets().right-300, getSize().height-getInsets().bottom-10);
+        dessin = false;
+        x = 0;
+        y = 0;
+        portee = 0;
         
         /* INIT BUFFER */
         Dimension dim = getSize();
@@ -119,6 +121,7 @@ public class Fenetre extends JFrame{
         }
 
         this.addMouseListener(new EcouteurClicSouris());
+        this.addMouseMotionListener(new EcouteurMoveSouris());
         
         setVisible(true); // A mettre a la fin, sinon grosse erreur lors du premier dessin !
         
@@ -145,7 +148,7 @@ public class Fenetre extends JFrame{
 		/* PEINTURE TOURS */
 		Tour cur2 = listeTour.root;
 		while(cur2 != null){
-			showPorteeTour(gb, cur2);
+			if(dessin) showPorteeTour(gb, cur2);
 			cur2.draw(gb);
 			//affichage des tirs
 			gb.setColor(Color.white);
@@ -173,7 +176,13 @@ public class Fenetre extends JFrame{
 			gb.drawString(Integer.toString(cur.getVie()) , cur.getPosx() + 10, cur.getPosy());
 			cur = cur.next;
 		}
-		
+		/* PEINTURE PREVISUALISATION */
+		if(dessin){
+			gb.drawArc(x-portee/2, y-portee/2, portee, portee, 0, 360);
+			gb.setColor(Color.red);
+			gb.drawLine(0,90 , 900,90);
+			gb.drawLine(0,690 , 900,690);
+		}
 		/* DESSIN GLOBAL */
         g.drawImage(monBuf,8,31,null);
         
@@ -247,7 +256,7 @@ public class Fenetre extends JFrame{
 				boolean aquecollision = false;
 				//Si l'ennemi courant est coince par un ennemi plus vieux, on recule jusqu'a la FIN de l'intersection,
 				//pour etre sur de ne jamais chevaucher un autre ennemi a la fin du deplacement
-				//Exception pour les sbireFantomes d'upgrade = 4
+				//Exception pour les sbireFantomes
 				while(prev.collision(cur) && !(cur instanceof SbireFantome) && !(prev instanceof SbireFantome)){
 					cur.moveBasique(true, true);
 					aquecollision = true;
@@ -256,11 +265,11 @@ public class Fenetre extends JFrame{
 				/*if(!aquecollision){
 					cur.dposx = - cur.dposx;
 				} else {	//On avance dans le meme sens que les vieux
-					cur.dposx = prev.dposx;
+					cur.setDposx(prev.dposx);
 					cur.buteeBas = prev.buteeBas;
-					//cur.enBas = true;	//On suit le vieux, on lui fait confiance, on ne re-check pas le bas
+					cur.enBas = true;	//On suit le vieux, on lui fait confiance, on ne re-check pas le bas
 				}*/
-				cur.dposx = - cur.dposx;
+				cur.dposx = - cur.dposx; //ligne a enlever si on fait suivre les vieux
 				cur.dposy = -cur.dposy;
 				if(cur != null){
 					cur = cur.next;
@@ -297,6 +306,57 @@ public class Fenetre extends JFrame{
 		repaint();
 	}
 	
+	private class TonNom extends JDialog {
+		private boolean sendData = false;
+		private JTextField nom;
+		TonNom(JFrame parent, String title, boolean modal, String text){
+			super(parent, title, modal);
+			setResizable(false);
+			setLocationRelativeTo(null);
+			initComponent(text);
+		}
+		
+		/* Initialisation de la fenetre */
+		private void initComponent(String str){
+			//Panel global
+			JPanel globalPane = new JPanel();
+			globalPane.setPreferredSize(new Dimension(450, 150));
+			
+			//Texte
+			JLabel textLabel = new JLabel(str);
+			globalPane.add(textLabel);
+			
+			//Champ de saisi
+			nom = new JTextField();
+			nom.setPreferredSize(new Dimension(400, 25));
+			nom.setHorizontalAlignment(JTextField.CENTER);
+			globalPane.add(nom);
+			
+			//Bouton OK
+			JButton okBouton = new JButton("OK !");
+			okBouton.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent a) {
+					sendData = true;
+					setVisible(false);	//Dialogue ferme lorsqu'on rend la fenetre invisible
+				}      
+			});
+			globalPane.add(okBouton);
+			
+			this.getContentPane().add(globalPane);
+			pack();
+		}
+		
+		public String showTonNom(){
+			//Reinitialisation du booleen d'autorisation d'envoie des donnees
+			sendData = false;
+			//On lance le dialogue en rendant la fenetre visible
+			setVisible(true);
+			/* LE DIALOGUE S'EFFECTUE ICI : sendData peut passer a vrai si on clique sur OK */
+			//Si on a clique sur OK, on envoie, sinon on envoie une chaine par default
+			return (sendData)? nom.getText() : "Annonyme";
+		}
+	}
+	
 	private void ecrireScore(int score){
 		//Variables lecture fichier scores
 		FileReader lecteur = null;
@@ -305,31 +365,91 @@ public class Fenetre extends JFrame{
 		FileWriter ecriveur = null;
 		BufferedWriter tamponEcriture = null;
 		//Potentielle String a ecrire dans le fichier des scores
-		String scoreString = bizuth.name + " " + score;
+		String scoreString = bizuth.name + " " + score + "\n";
+		//Tableau des scores
+		String[] scores = new String[5];
+		int rangScore = -1;	//Rang du nouveau record ; -1 si aucun nouveau record
 		
+		System.out.println("Score " + score);
+		
+		JOptionPane finJeu = new JOptionPane();
+		String[] fin = {"Recommencer", "Quitter", "Voir les autres strateges"};
+		String strFin = "<html><body><div align='center'>Fin du jeu, tu as perdu au niveau " + niveau + " !<br/>";
+		int rang = 0;
+
 		try {
 			lecteur = new FileReader("scores.txt");
 			tamponLecture = new BufferedReader(lecteur);
-			String ligne;
-			int exScore = 0;
-			while(true) {
-				ligne = tamponLecture.readLine();
-				if(ligne == null) break;
-				for(int i = 0 ; i < ligne.length() ; i++){
-					if(ligne.charAt(i) == ' '){
-						exScore = Integer.parseInt(ligne.substring(i+1, ligne.length()));
-						break;
+			String ligne;	//Ligne tampon pour l'eventuelle nouveau record
+			int exScore = 0;	//Initialisation de l'ancien record
+			for(int r = 0 ; r < scores.length ; r++){
+				//Lecture de la ligne r et stockage dans un tableau
+				scores[r] = tamponLecture.readLine() + "\n";
+				System.out.print("scores[" + r + "] " + scores[r]);
+				for(int i = 0 ; i < scores[r].length() ; i++){
+					//SI on n'a pas encore identifier un record
+					if(scores[r].charAt(i) == ' ' && rangScore == -1){
+						exScore = Integer.parseInt(scores[r].substring(i+1, scores[r].length()-1));
+						//Si le nouveau score est un record
+						if(score > exScore){
+							//Stockage du rang du record
+							rangScore = r;
+							System.out.println("Nouveau record de " + score + "!!" + rangScore);
+						}
 					}
 				}
-				if(exScore > 0) break;
 			}
-			System.out.println("exScore " + exScore);
-			if(score > exScore) {
+			
+			//SI il y a eu nouveau score
+			if(rangScore != -1){
+				strFin += "<br/>Mais tu as tout de meme fait mieux que certains autres strateges.<br/>Quel est ton nom ?</div></body></html>";
+				TonNom nom = new TonNom(null, "GAME OVER !", true, strFin);
+				String str = nom.showTonNom();
+				//JOptionPane tonNom = new JOptionPane();
+				//String str = tonNom.showInputDialog(null, strFin, "GAME OVER !", JOptionPane.QUESTION_MESSAGE);
+				//Pour ne pas corrompre le fichier des scores
+				str = str.replaceAll(" ", "");
+				if(str.equals("")){
+					str = "Annonyme";
+				}
+				bizuth.name = str;
+				JOptionPane andNow = new JOptionPane();
+				rang = finJeu.showOptionDialog(null, "D'autres campements peuvent avoir besoin de ton aide.\nQue veux-tu faire ?", "Et maintenant ?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, fin, fin[1]);
+				scoreString = bizuth.name + " " + score + "\n";
+				//Tampon de la ligne ou sera ecrite le nouveau score
+				ligne = scores[rangScore];
+				//Ecriture du nouveau score dans le tableau
+				scores[rangScore] = scoreString;
+				//SI on n'a pas fait le dernier score
+				//On decale les scores d'un rang = une ligne vers le bas
+				if(rangScore < 5){
+					//Variable de stockage de l'ex score
+					String ligneTampon;
+					for(int i = rangScore + 1 ; i < scores.length; i++){
+						//Tampon de la ligne i
+						ligneTampon = scores[i];
+						//Reecriture de la ligne i avec l'ancien score du dessus
+						scores[i] = ligne;
+						//Remise en place du tampon pour le prochain tour de boucle
+						ligne = ligneTampon;
+					}
+				}
+				/*DEBUGAGE*/
+				for(int r = 0 ; r < scores.length ; r++){
+					System.out.print("scores["+r+"] " + scores[r]);
+				}
+				//*//
+				//Reecriture du tableau des scores dans le fichier bdd
 				ecriveur = new FileWriter("scores.txt");
 				tamponEcriture = new BufferedWriter(ecriveur);
-				tamponEcriture.write(scoreString);
-				System.out.println("Nouveau Score " + score);
-			} else System.out.println("Imbattu");
+				for(int r = 0 ; r < scores.length ; r++){
+					tamponEcriture.write(scores[r]);
+				}
+			}  else {
+				strFin += "Dommage, tu essaieras de faire mieux la prochaine fois !";
+				rang = finJeu.showOptionDialog(null, strFin, "GAME OVER !", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, fin, fin[1]);
+			}
+		
 		} catch (IOException e){
 			e.printStackTrace();
 		} finally {
@@ -346,6 +466,22 @@ public class Fenetre extends JFrame{
 			} catch (IOException e2) {
 				e2.printStackTrace();
 			}
+		}
+		
+		switch(rang){
+			case 0 :
+				System.out.println("Tu as choisi de recommencer");
+				recommencer();
+				break;
+			case 1 :
+				System.out.println("Tu as choisi de quitter");
+				System.exit(0);
+			case 2 :
+				Menu.affichageScore();
+				recommencer();
+				break;
+			default :
+				System.exit(0);
 		}
 			
 	}
@@ -376,11 +512,12 @@ public class Fenetre extends JFrame{
 		niveauReady = true;
         
         /* INIT MENU */
+        menuTest.setJoueur(bizuth);
+        menuTest.reInit();
         menuTest.argent.setText("Argent : " + bizuth.argent + "$");
         menuTest.vie.setText("PV : " + bizuth.vie);
         menuTest.niveau.setText("Niveau: " + niveau);
-        
-        
+        dessin = false;
 		
 		/* INIT QUADRILAGE DE LA CARTE
          * Uniquement sur la zone jouable
@@ -401,6 +538,51 @@ public class Fenetre extends JFrame{
 		repaint();
 	}
 	
+	private class EcouteurMoveSouris extends MouseMotionAdapter {
+		
+		public void mouseMoved(MouseEvent e){
+			if(menuTest.getVariable() != 0 && niveauReady){
+				dessin = true;
+				int i = (int)((e.getX()-8)/Case.LCASE);;	//-8 pour contrer le decalage du buffer
+				int j = (int)((e.getY()-31)/Case.LCASE);	//-31 pour contrer le decalage du buffer
+				x = i*Case.LCASE + Case.LCASE/2;	//On visualise au centre de la case
+				y = j*Case.LCASE + Case.LCASE/2;
+				switch(menuTest.getVariable()){
+					case 1 :
+						portee = Tour1.RANGE;
+						break;
+					case 2 :
+						portee = Tour2.RANGE;
+						break;
+					case 3 :
+						portee = Tour3.RANGE;
+						break;
+					case 4 :
+						portee = Tour4.RANGE;
+						break;
+					case 5 :
+						portee = 0;	//Et pas dessin = false pour pouvoir aussi previsualiser lors du placement d'une barriere
+						break;
+					case 6 :
+						portee = Piege1.RANGE;
+						break;
+					case 7 :
+						portee = Piege2.RANGE;
+						break;
+					case 8 :
+						portee = Piege3.RANGE;
+						break;
+					default :
+						dessin = false;
+						break;
+				}
+				repaint();
+			} else {
+				dessin = false;
+			}
+		}
+	}
+	
 	private class EcouteurClicSouris implements MouseListener {
 		//BUTTON1 = clic gauche
 		//BUTTON2 = clic molette
@@ -419,141 +601,149 @@ public class Fenetre extends JFrame{
 			int y = j*Case.LCASE;
 			//
 			String str = "Tour";
-
 			//Si on a cliquee sur un case vide
-			if(!tabCases[i][j].isOccupe()){
-				if(boutonSouris == e.BUTTON1){
-					//Pour ne pas placer une tour hors de la zone de jeu :
-					if(i < tabCases.length && j < tabCases[0].length - 1 && j > 0){
-					switch(menuTest.getVariable()){
-						//NB : 	les objets sont places au centre des cases
-						case 1:
-							if(!tabCases[i][j].isChemin()){
-								listeTour.insertTete(new Tour1(ecran, x+1, y-7));	//+1 -7 pour replacer l'image bien au centre
-								bizuth.argent -= Tour1.PRIX;
-							} else {
-								pose = false;
-							}
-							break;
-						
-						case 2:
-							if(!tabCases[i][j].isChemin()){
-								listeTour.insertTete(new Tour2(ecran, x+1, y-2));
-								bizuth.argent -= Tour2.PRIX;
+			if(niveauReady){
+				if(!tabCases[i][j].isOccupe()){
+					if(boutonSouris == e.BUTTON1){
+						//Pour ne pas placer une tour hors de la zone de jeu :
+						if(i < tabCases.length && j < tabCases[0].length - 2 && j > 2){
+						switch(menuTest.getVariable()){
+							//NB : 	les objets sont places au centre des cases
+							case 1:
+								if(!tabCases[i][j].isChemin()){
+									listeTour.insertTete(new Tour1(ecran, x+1, y-7));	//+1 -7 pour replacer l'image bien au centre
+									bizuth.argent -= Tour1.PRIX;
+								} else {
+									pose = false;
+								}
 								break;
-							} else {
-								pose = false;
-							}
-						
-						case 3:
-							if(!tabCases[i][j].isChemin()){
-								listeTour.insertTete(new Tour3(ecran, x, y));
-								bizuth.argent -= Tour3.PRIX;
-								break;
-							} else {
-								pose = false;
-							}
-						
-						case 4:
-							if(!tabCases[i][j].isChemin()){
-								listeTour.insertTete(new Tour4(ecran, x, y-2));
-								bizuth.argent -= Tour4.PRIX;
-								break;
-							} else {
-								pose = false;
-							}
-						
-						case 5:	//Barriere
-								//A noter que les verifications se font dans un ordre precis limitant la multiplication des cas
-							//SI on veut placer une barriere sur la gauche du chemin
-							if(tabCases[i][j].isChemin() && !tabCases[i-1][j].isChemin() && tabCases[i+1][j].isChemin() && i < tabCases.length-2 && j > 2 && j< tabCases[0].length-2){
-								//SI il y a la place pour que les ennemis passent en haut
-								if(tabCases[i+2][j].isChemin() && tabCases[i+3][j].isChemin() && tabCases[i+2][j-1].isChemin() && tabCases[i+3][j-1].isChemin() && tabCases[i+2][j-2].isChemin() && tabCases[i+3][j-2].isChemin() || (!tabCases[i][j-1].isChemin() && !tabCases[i+1][j-1].isChemin() || (!tabCases[i][j-2].isChemin() && !tabCases[i+1][j-2].isChemin()))){
-									//SI il y a la place pour que les ennemis passent en bas
-									if(tabCases[i+2][j+1].isChemin() && tabCases[i+3][j+1].isChemin() && tabCases[i+2][j+2].isChemin() && tabCases[i+3][j+2].isChemin() || (!tabCases[i][j+1].isChemin() && !tabCases[i+1][j+1].isChemin() || (!tabCases[i][j+2].isChemin() && !tabCases[i+1][j+2].isChemin()))){
-										listeBarrieres.insertTete(new Barriere(x+5, y+3, chemin, tabCases));
-										bizuth.argent -= Barriere.PRIX;
-										menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-										str = "Barriere";
+							
+							case 2:
+								if(!tabCases[i][j].isChemin()){
+									listeTour.insertTete(new Tour2(ecran, x+1, y-2));
+									bizuth.argent -= Tour2.PRIX;
+									break;
+								} else {
+									pose = false;
+								}
+							
+							case 3:
+								if(!tabCases[i][j].isChemin()){
+									listeTour.insertTete(new Tour3(ecran, x, y));
+									bizuth.argent -= Tour3.PRIX;
+									break;
+								} else {
+									pose = false;
+								}
+							
+							case 4:
+								if(!tabCases[i][j].isChemin()){
+									listeTour.insertTete(new Tour4(ecran, x, y-2));
+									bizuth.argent -= Tour4.PRIX;
+									break;
+								} else {
+									pose = false;
+								}
+							
+							case 5:	//Barriere
+									//A noter que les verifications se font dans un ordre precis limitant la multiplication des cas
+								//SI on veut placer une barriere sur la gauche du chemin
+								if(tabCases[i][j].isChemin() && !tabCases[i-1][j].isChemin() && tabCases[i+1][j].isChemin() && i < tabCases.length-2 && j > 2 && j< tabCases[0].length-2){
+									//SI il y a la place pour que les ennemis passent en haut
+									if(tabCases[i+2][j].isChemin() && tabCases[i+3][j].isChemin() && tabCases[i+2][j-1].isChemin() && tabCases[i+3][j-1].isChemin() && tabCases[i+2][j-2].isChemin() && tabCases[i+3][j-2].isChemin() || (!tabCases[i][j-1].isChemin() && !tabCases[i+1][j-1].isChemin() || (!tabCases[i][j-2].isChemin() && !tabCases[i+1][j-2].isChemin()))){
+										//SI il y a la place pour que les ennemis passent en bas
+										if(tabCases[i+2][j+1].isChemin() && tabCases[i+3][j+1].isChemin() && tabCases[i+2][j+2].isChemin() && tabCases[i+3][j+2].isChemin() || (!tabCases[i][j+1].isChemin() && !tabCases[i+1][j+1].isChemin() || (!tabCases[i][j+2].isChemin() && !tabCases[i+1][j+2].isChemin()))){
+											listeBarrieres.insertTete(new Barriere(x+5, y+3, chemin, tabCases));
+											bizuth.argent -= Barriere.PRIX;
+											menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+											str = "Barriere";
+										} else {
+											pose = false;
+										}
+									} else {
+										pose = false;
+									}
+								//SINON SI on veut placer une barriere sur la droite du chemin
+								} else if(tabCases[i][j].isChemin() && !tabCases[i+1][j].isChemin() && tabCases[i-1][j].isChemin() && i > 2 && j > 2 && j< tabCases[0].length-2){
+									//SI il y a la place pour que les ennemis passent en haut
+									if(tabCases[i-2][j].isChemin() && tabCases[i-3][j].isChemin() && tabCases[i-2][j-1].isChemin() && tabCases[i-3][j-1].isChemin() && tabCases[i-2][j-2].isChemin() && tabCases[i-3][j-2].isChemin() || (!tabCases[i][j-1].isChemin() && !tabCases[i-1][j-1].isChemin() || (!tabCases[i][j-2].isChemin() && !tabCases[i-1][j-2].isChemin()))){
+										//SI il y a la place pour que les ennemis passent en bas
+										if(tabCases[i-2][j+1].isChemin() && tabCases[i-3][j+1].isChemin() && tabCases[i-2][j+2].isChemin() && tabCases[i-3][j+2].isChemin() || (!tabCases[i][j+1].isChemin() && !tabCases[i-1][j+1].isChemin() || (!tabCases[i][j+2].isChemin() && !tabCases[i-1][j+2].isChemin()))){
+											listeBarrieres.insertTete(new Barriere(x-Case.LCASE+5, y+3, chemin, tabCases));
+											bizuth.argent -= Barriere.PRIX;
+											menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+											str = "Barriere";
+										} else {
+											pose = false;
+										}
 									} else {
 										pose = false;
 									}
 								} else {
 									pose = false;
 								}
-							//SINON SI on veut placer une barriere sur la droite du chemin
-							} else if(tabCases[i][j].isChemin() && !tabCases[i+1][j].isChemin() && tabCases[i-1][j].isChemin() && i > 2 && j > 2 && j< tabCases[0].length-2){
-								//SI il y a la place pour que les ennemis passent en haut
-								if(tabCases[i-2][j].isChemin() && tabCases[i-3][j].isChemin() && tabCases[i-2][j-1].isChemin() && tabCases[i-3][j-1].isChemin() && tabCases[i-2][j-2].isChemin() && tabCases[i-3][j-2].isChemin() || (!tabCases[i][j-1].isChemin() && !tabCases[i-1][j-1].isChemin() || (!tabCases[i][j-2].isChemin() && !tabCases[i-1][j-2].isChemin()))){
-									//SI il y a la place pour que les ennemis passent en bas
-									if(tabCases[i-2][j+1].isChemin() && tabCases[i-3][j+1].isChemin() && tabCases[i-2][j+2].isChemin() && tabCases[i-3][j+2].isChemin() || (!tabCases[i][j+1].isChemin() && !tabCases[i-1][j+1].isChemin() || (!tabCases[i][j+2].isChemin() && !tabCases[i-1][j+2].isChemin()))){
-										listeBarrieres.insertTete(new Barriere(x-Case.LCASE+5, y+3, chemin, tabCases));
-										bizuth.argent -= Barriere.PRIX;
-										menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-										str = "Barriere";
-									} else {
-										pose = false;
-									}
-								} else {
-									pose = false;
-								}
-							} else {
-								pose = false;
-							}
-							break;
-							
-						case 6:
-							if(tabCases[i][j].isChemin()){
-								listeTour.insertTete(new Piege1(x, y));
-								bizuth.argent -= Piege1.PRIX;
 								break;
-							} else {
-								pose = false;
-							}
-							
-						case 7:
-							if(tabCases[i][j].isChemin()){
-								listeTour.insertTete(new Piege2(x, y));
-								bizuth.argent -= Piege2.PRIX;
-								break;
-							} else {
-								pose = false;
-							}
 								
-						case 8:
-							if(tabCases[i][j].isChemin()){
-								listeTour.insertTete(new Piege3(x, y));
-								bizuth.argent -= Piege3.PRIX;
-								break;
-							} else {
-								pose = false;
-							}
-					}
-					} else pose = false;
+							case 6:
+								if(tabCases[i][j].isChemin()){
+									listeTour.insertTete(new Piege1(x, y));
+									bizuth.argent -= Piege1.PRIX;
+									break;
+								} else {
+									pose = false;
+								}
+								
+							case 7:
+								if(tabCases[i][j].isChemin()){
+									listeTour.insertTete(new Piege2(x, y));
+									bizuth.argent -= Piege2.PRIX;
+									break;
+								} else {
+									pose = false;
+								}
+									
+							case 8:
+								if(tabCases[i][j].isChemin()){
+									listeTour.insertTete(new Piege3(x, y));
+									bizuth.argent -= Piege3.PRIX;
+									break;
+								} else {
+									pose = false;
+								}
+						}
+						} else pose = false;
+						
+						if(menuTest.getVariable() == 6 || menuTest.getVariable() == 7 || menuTest.getVariable() == 8){
+							str = "Piege";
+						}
 					
-					if(menuTest.getVariable() == 6 || menuTest.getVariable() == 7 || menuTest.getVariable() == 8){
-						str = "Piege";
-					}
-				
-					//Si on a bel et bien pose quelque chose
-					if(pose){
-						menuTest.setVariable(0);
-						menuTest.argent.setText("Argent : " + bizuth.argent + "$");
-						tabCases[i][j].setOccupe(true);
-						menuTest.getInfoJeu().setText(str + " en position !");
-					} else {
-						menuTest.getInfoJeu().setText("Impossible de placer ca ici !");
-					}
-					repaint();
+						//Si on a bel et bien pose quelque chose
+						if(pose){
+							dessin = false;	//Pour ne pas redessiner une derniere fois la portee de previsualisation
+							menuTest.setVariable(0);
+							menuTest.argent.setText("Argent : " + bizuth.argent + "$");
+							tabCases[i][j].setOccupe(true);
+							menuTest.getInfoJeu().setText(str + " en position !");
+						} else {
+							menuTest.getInfoJeu().setText("Impossible de placer ca ici !");
+						}
+						repaint();
 
-				} else if(boutonSouris == e.BUTTON3){
+					} else if(boutonSouris == e.BUTTON3){
+						menuTest.setVariable(0);
+						dessin = false;
+						repaint();
+					}
+					
+				} else {
+					menuTest.getInfoJeu().setText("Impossible de placer ca ici !");
+				}
+			} else {
+				menuTest.getInfoJeu().setText("Impossible de placer ca maintenant !");
+				if(boutonSouris == e.BUTTON3){
 					menuTest.setVariable(0);
 				}
-			
-			} else {
-				menuTest.getInfoJeu().setText("Impossible de placer ca ici !");
 			}
-				
 		}
 		
 		public void mouseExited(MouseEvent e){
@@ -596,7 +786,7 @@ public class Fenetre extends JFrame{
 		public void ennemiMort(EnnemiEvent e){
 			System.out.print("Un ennemi est mort !! ");
 			System.out.println(e.getEnnemi());
-			//Une chance sur 2 pour les ennemis d'upgrade 3 de pouvoir devenir des fantomes !
+			//Une chance sur 2 pour les ennemis Sbire3 de pouvoir devenir des fantomes !
 			if(e.getEnnemi() instanceof Sbire3 && (int)(2*Math.random()) == 1){
 				SbireFantome sbireFantome = new SbireFantome(ecran, e.getEnnemi().IDEnnemi, e.getEnnemi().posx, e.getEnnemi().posy);
 				sbireFantome.addEnnemiListener(new EcouteurEnnemi());
@@ -625,21 +815,9 @@ public class Fenetre extends JFrame{
 				spawn.stop();
 				timer.stop();
 				menuTest.infoJeu.setText("Fin du jeu, tu as perdu au niveau " + niveau + " !");
-				System.out.println("infoJeu devrait afficher : 'Fin du jeu, tu as perdu au niveau " + niveau + " !'");
 				enCours = false;
 				menuTest.MajVersStart();
 				niveauReady = true;
-				JOptionPane finJeu = new JOptionPane();
-				String[] fin = {"Recommencer", "Quitter"};
-				int rang = finJeu.showOptionDialog(null, "Fin du jeu, tu as perdu au niveau " + niveau + " ! \nDommage, tu essaieras de faire mieux la prochaine fois !", "GAME OVER !", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, fin, fin[1]);
-				if(rang == 1){
-					System.out.println("Tu as choisi de quitter");
-					System.exit(0);
-				}
-				if(rang == 0){
-					System.out.println("Tu as choisi de recommencer");
-					recommencer();
-				}
 			}
 			menuTest.vie.setText("PV : " + bizuth.vie);
 			e.getEnnemi().removeEnnemiListener(this);
@@ -650,23 +828,24 @@ public class Fenetre extends JFrame{
 		public void finDuNiveau(){
 			if(listeEnnemis.root == null && nbSpawn == -1){
 				menuTest.infoJeu.setText("Fin du niveau " + niveau + " !");
-				System.out.println("infoJeu devrait afficher : 'Fin du niveau " + niveau + " !'");
+				menuTest.updateBoutons(niveau+1);
 				enCours = false;
 				niveauReady = true;
 				menuTest.MajVersStart();
+				menuTest.niveau.setText("Niveau : "+(niveau+1));
 				spawn.stop();
 				if(niveau == 2){
 					JOptionPane level3 = new JOptionPane();
 					level3.showMessageDialog(null, "Felicitations, tu as servecu aux deux premieres vagues !",
 											"Niveau 3", JOptionPane.INFORMATION_MESSAGE);
 					ImageIcon icone = new ImageIcon(Sbire2.nomImage);
-					level3.showMessageDialog(null, "L'ennemis n'est pas content, il va maintenant commencer a envoyer des Sbires Verts !" +
+					level3.showMessageDialog(null, "L'ennemis n'est pas content, il va maintenant commencer a envoyer des Sbires Feroces !" +
 											"\n" + "Attention, ils sont plus resistants que ceux que tu as vu jusqu'a present...",
 											"Niveau 3", JOptionPane.INFORMATION_MESSAGE, icone);
 				} else if(niveau == 6){
 					ImageIcon icone = new ImageIcon(Sbire3.nomImage);
 					JOptionPane level7 = new JOptionPane();
-					level7.showMessageDialog(null, "L'ennemi va maintenant pouvoir envoyer des Sbires Rouges," +
+					level7.showMessageDialog(null, "L'ennemi va maintenant pouvoir envoyer des Sbires Guerriers," +
 											"\n" + "ses plus fideles combatants !",
 											"Niveau 7", JOptionPane.INFORMATION_MESSAGE, icone);
 					icone = new ImageIcon(SbireFantome.nomImage);
@@ -683,7 +862,6 @@ public class Fenetre extends JFrame{
 	public static void main(String[] args) {
 
 		Fenetre game = new Fenetre();
-		//game.menuTest.update(game.getGraphics());
 
     }
 	
@@ -739,7 +917,7 @@ public class Fenetre extends JFrame{
 	
 	/* Visualisation Arc2D portee des tours */
 	private void showPorteeTour(Graphics gb, Tour eiffel){
-		gb.setColor(Color.darkGray);
+		gb.setColor(Color.white);
 		gb.drawArc(eiffel.getPosx()-(int)eiffel.portee.getWidth()/2 + eiffel.cadre.width/2, eiffel.getPosy()-(int)eiffel.portee.getHeight()/2+ eiffel.cadre.height/2, (int)eiffel.portee.getWidth(), (int)eiffel.portee.getHeight(), 0, 360);
 	}
     

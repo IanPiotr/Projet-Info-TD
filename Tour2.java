@@ -19,11 +19,12 @@ import javax.swing.*;
 public class Tour2 extends Tour{
 
 	private static final String nomImage = "Tour2.png";
-	public static final int PRIX = 200;
+	public static final int PRIX = 400;
+	public static final int RANGE = 200;
 
 	public Tour2(Rectangle fenetre, int x, int y){
-		super(nomImage, x, y, PRIX, 50, 250, 0, 10); //Tour fusil a pompe
-		rate = 75;
+		super(nomImage, x, y, PRIX, 5, RANGE, 0, 1); //tour standard, Focus 1 ennemi
+		rate = 4;
 	}
-
+	
 }

@@ -12,7 +12,7 @@ public class SbireFantome extends Ennemis{
 
 	public SbireFantome(Rectangle fenetre, int num, int x, int y){
 		super(fenetre, num, x, y, 1000, nomImage);
-		recompense = 100;
+		recompense = 200;
 		setVitesse(1);
 	}
 	

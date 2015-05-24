@@ -13,7 +13,7 @@ public class Sbire1 extends Ennemis{
 
 	public Sbire1(Rectangle fenetre, int num, int x, int y, int hp){
 		super(fenetre, num, x, y, hp, nomImage);
-		recompense = 10;
+		recompense = 25;
 	}
 	
 	public void setDposx(int dx){
