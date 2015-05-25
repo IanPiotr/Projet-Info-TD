@@ -148,7 +148,9 @@ public class Fenetre extends JFrame{
 		/* PEINTURE TOURS */
 		Tour cur2 = listeTour.root;
 		while(cur2 != null){
-			if(dessin) showPorteeTour(gb, cur2);
+			if(dessin){
+				 showPorteeTour(gb, cur2);
+			}
 			cur2.draw(gb);
 			//affichage des tirs
 			gb.setColor(Color.white);
@@ -178,8 +180,9 @@ public class Fenetre extends JFrame{
 		}
 		/* PEINTURE PREVISUALISATION */
 		if(dessin){
+			gb.setColor(Color.CYAN);
 			gb.drawArc(x-portee/2, y-portee/2, portee, portee, 0, 360);
-			gb.setColor(Color.red);
+			gb.setColor(Color.RED);
 			gb.drawLine(0,90 , 900,90);
 			gb.drawLine(0,690 , 900,690);
 		}
