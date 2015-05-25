@@ -827,6 +827,7 @@ public class Fenetre extends JFrame{
 		
 		public void finDuNiveau(){
 			if(listeEnnemis.root == null && nbSpawn == -1){
+				repaint();
 				menuTest.infoJeu.setText("Fin du niveau " + niveau + " !");
 				menuTest.updateBoutons(niveau+1);
 				enCours = false;
