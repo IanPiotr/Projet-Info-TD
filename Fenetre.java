@@ -530,7 +530,7 @@ public class Fenetre extends JFrame{
 				tabCases[i][j].setHybride(false);
 				tabCases[i][j].setOccupe(false);
 				tabCases[i][j].setBordure(false);
-				tabCases[i][j].setImage(null);
+				tabCases[i][j].setImage("caseLambda.png");
 			}
 		}
 		chemin = new Chemin(tabCases);
