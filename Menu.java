@@ -360,16 +360,16 @@ public class Menu extends JLayeredPane {
 			
 			//Panel global
 			JPanel globalPane = new JPanel();
-			globalPane.setPreferredSize(new Dimension(650, 375));
+			globalPane.setPreferredSize(new Dimension(800, 375));
 
 			//Les ennemis
 			JPanel panEnnemis = new JPanel();
-			panEnnemis.setPreferredSize(new Dimension(650, 100));
+			panEnnemis.setPreferredSize(new Dimension(800, 100));
 			JPanel panEnnemisExp = new JPanel();
-			panEnnemisExp.setPreferredSize(new Dimension(550, 90));
+			panEnnemisExp.setPreferredSize(new Dimension(650, 90));
 			panEnnemisExp.setLayout(new BorderLayout());
 			panEnnemisExp.setBorder(BorderFactory.createTitledBorder("Les Ennemis"));
-			JLabel iconEnnemis = new JLabel(new ImageIcon("sbire1Reverse.png"));
+			JLabel iconEnnemis = new JLabel(new ImageIcon("Sbire1Reverse.png"));
 			JLabel ennemisLabel = new JLabel("<html>Des vagues d'ennemis vont deferler du nord pour attaquer le campement !<br/>Le seul moyen de nous defendre est de placer des defenses sur le chemin qui y mene.<br/>Plus tu combattras de vagues, plus il seront puissants. Fais donc attention !</html>");
 			panEnnemisExp.add(ennemisLabel, BorderLayout.WEST);
 			panEnnemis.add(panEnnemisExp);
@@ -378,9 +378,9 @@ public class Menu extends JLayeredPane {
 			
 			//Les tours et pieges
 			JPanel panTour = new JPanel();
-			panTour.setPreferredSize(new Dimension(650, 100));
+			panTour.setPreferredSize(new Dimension(800, 100));
 			JPanel panTourExp = new JPanel();
-			panTourExp.setPreferredSize(new Dimension(600, 90));
+			panTourExp.setPreferredSize(new Dimension(710, 90));
 			panTourExp.setLayout(new BorderLayout());
 			panTourExp.setBorder(BorderFactory.createTitledBorder("Les defenses"));
 			JLabel iconTour = new JLabel(iconTour1);
@@ -392,9 +392,9 @@ public class Menu extends JLayeredPane {
 			
 			//Les barrieres
 			JPanel panBarriere = new JPanel();
-			panBarriere.setPreferredSize(new Dimension(650, 100));
+			panBarriere.setPreferredSize(new Dimension(800, 100));
 			JPanel panBarriereExp = new JPanel();
-			panBarriereExp.setPreferredSize(new Dimension(550, 90));
+			panBarriereExp.setPreferredSize(new Dimension(650, 90));
 			panBarriereExp.setLayout(new BorderLayout());
 			panBarriereExp.setBorder(BorderFactory.createTitledBorder("Les Barrieres"));
 			JLabel iconBarr = new JLabel(iconBarriere);
