@@ -19,7 +19,7 @@ public abstract class Tour extends Element {
 	protected Arc2D.Double portee;
 	protected int coeffVit; 	//coefficient Vitesse: variable pour le ralentissement des ennemis: coeffVit vitesse standard = 2; coeffVitvitesse ralentie = 1
 	public Tour next;
-	protected int focus	 //nombre d'ennemis que la tour peut "focus" pour un tir
+	protected int focus;	 //nombre d'ennemis que la tour peut "focus" pour un tir
 	public Ennemis[] cibles;
 	protected int rate;	//cadence de tir
 	public int aTire;	//durée d'affichage du tir (en tours de boucles)
