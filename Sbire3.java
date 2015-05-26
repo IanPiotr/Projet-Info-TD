@@ -9,7 +9,7 @@ public class Sbire3 extends Ennemis{
 	
 	public static final String nomImage = "Sbire3.png";
 	public static final String nomImageReverse = "Sbire3Reverse.png";
-	public static final int VIE_MIN = 30;
+	public static final int VIE_MIN = 80;
 
 	public Sbire3(Rectangle fenetre, int num, int x, int y, int hp){
 		super(fenetre, num, x, y, hp, nomImage);
