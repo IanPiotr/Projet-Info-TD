@@ -58,7 +58,7 @@ public class Fenetre extends JFrame{
 
 	public Fenetre() {
         /* INIT FRAME */
-        super("Tower Defense les ptits loups");
+        super("Le tower defense des petis loups");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1203,770);
         setResizable(true);
