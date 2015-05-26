@@ -203,9 +203,9 @@ public class Chemin{
 							tabCases[i][j].setImage(nomImHautGauche);
 						}else if(somme==2 ||somme==18){	//haut droite
 							tabCases[i][j].setImage(nomImHautDroite);
-						}else if(somme==7){
+						}else if(somme==15){
 							tabCases[i][j].setImage(nomImHautGaucheCreux);
-						}else if(somme==19){
+						}else if(somme==27){
 							tabCases[i][j].setImage(nomImHautDroiteCreux);
 						}
 					
@@ -226,9 +226,9 @@ public class Chemin{
 							tabCases[i][j].setImage(nomImBasGauche);
 						}else if(somme==16 ||somme==20){	//bas droite
 							tabCases[i][j].setImage(nomImBasDroite);
-						}else if(somme==25){
+						}else if(somme==27){
 							tabCases[i][j].setImage(nomImBasGaucheCreux);
-						}else if(somme==28){
+						}else if(somme==30){
 							tabCases[i][j].setImage(nomImBasDroiteCreux);
 						}
 					
