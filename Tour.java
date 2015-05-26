@@ -15,11 +15,11 @@ import javax.imageio.ImageIO;
 public abstract class Tour extends Element {
 	
 	public int prix;
-	protected int puissance; //nombre de dégâts infligés à un ennemi par tir
+	protected int puissance; 	//nombre de dégâts infligés à un ennemi par tir
 	protected Arc2D.Double portee;
-	protected int coeffVit; //coefficient Vitesse: variable pour le ralentissement des ennemis: coeffVit vitesse standard = 2; coeffVitvitesse ralentie = 1
+	protected int coeffVit; 	//coefficient Vitesse: variable pour le ralentissement des ennemis: coeffVit vitesse standard = 2; coeffVitvitesse ralentie = 1
 	public Tour next;
-	protected int focus; //nombre d'ennemis que la tour peut "focus" pour un tir
+	protected int focus	 //nombre d'ennemis que la tour peut "focus" pour un tir
 	public Ennemis[] cibles;
 	protected int rate;	//cadence de tir
 	public int aTire;	//durée d'affichage du tir (en tours de boucles)
@@ -65,10 +65,10 @@ public abstract class Tour extends Element {
 		int nbFocus = 0;
 		aTire = 7;
 		Ennemis curE = le.root;
-		while(curE != null){	//on parcourt la liste d'ennemis
-			if(collision(curE) && cadence%rate == 0){ //si l'ennemi est à portée de tir de la tour, et que la tour est prête à tirer
-				if(nbFocus<focus){ //on vérifie que la tour n'a pas dépassé son nombre max de "focus"
-					curE.setVie(puissance); //on enlève des points de vie à l'ennemi
+		while(curE != null){		//on parcourt la liste d'ennemis
+			if(collision(curE) && cadence%rate == 0){ 	//si l'ennemi est à portée de tir de la tour, et que la tour est prête à tirer
+				if(nbFocus<focus){ 	//on vérifie que la tour n'a pas dépassé son nombre max de "focus"
+					curE.setVie(puissance); 	//on enlève des points de vie à l'ennemi
 					cibles[nbFocus] = curE;
 					nbFocus++; 
 				}
