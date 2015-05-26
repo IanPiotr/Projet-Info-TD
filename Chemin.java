@@ -185,7 +185,9 @@ public class Chemin{
 				if(!tabCases[i][j].isChemin()){
 					somme = 0;
 					indice = 0;
-					if(j==0){				//cas de la première ligne
+					
+					/*Cas de la première ligne*/
+					if(j==0){
 						for(int l = j; l<=j+1;l++){	//parcours des 6 cases adjacentes à la case considérée
 							for(int k =i-1; k<=i+1;k++){
 								if(!tabCases[k][l].isChemin() && !(k==i && j==l)){
@@ -201,9 +203,38 @@ public class Chemin{
 							tabCases[i][j].setImage(nomImHautGauche);
 						}else if(somme==2 ||somme==18){	//haut droite
 							tabCases[i][j].setImage(nomImHautDroite);
+						}else if(somme==7){
+							tabCases[i][j].setImage(nomImHautGaucheCreux);
+						}else if(somme==19){
+							tabCases[i][j].setImage(nomImHautDroiteCreux);
+						}
+					
+					/*Cas de la dernière ligne*/	
+					}else if(j>=tabCases[0].length-1){
+						for(int l = j-1; l<=j;l++){	//parcours des 6 cases adjacentes à la case considérée
+							for(int k =i-1; k<=i+1;k++){
+								if(!tabCases[k][l].isChemin() && !(k==i && j==l)){
+									somme = somme + (int)Math.pow(2.0,(double)indice);
+								}
+								if (!(k==i && j==l)){
+									indice++;
+								}
+							}
 						}
 						
-					}else{				//cas des autres lignes
+						if(somme==8 || somme==9){ //bas gauche
+							tabCases[i][j].setImage(nomImBasGauche);
+						}else if(somme==16 ||somme==20){	//bas droite
+							tabCases[i][j].setImage(nomImBasDroite);
+						}else if(somme==25){
+							tabCases[i][j].setImage(nomImBasGaucheCreux);
+						}else if(somme==28){
+							tabCases[i][j].setImage(nomImBasDroiteCreux);
+						}
+					
+					
+					/*Cas des autres lignes*/	
+					}else{
 						for(int l = j-1; l<=j+1;l++){	//parcours des 9 cases adjacentes à la case considérée
 							for(int k =i-1; k<=i+1;k++){
 								if(!tabCases[k][l].isChemin() && !(k==i && j==l)){
@@ -311,7 +342,7 @@ public class Chemin{
 			while(y<h-1){
 				
 				rand = Math.random();
-				if(rand<dirProba[0] && x>2){	//gauche
+				if(rand<dirProba[0] && x>3){	//gauche
 					if(dir ==0){				//si le chemin est deja en train d'aller à gauche, la probabilité de continuer à aller à gauche diminue petit a petit. De même s'il descend ou va vers la droite
 						dirProba[0] = dirProba[0]*ATTENUATION_LAT;
 						dirProba[1] = 1-dirProba[0];
@@ -333,7 +364,7 @@ public class Chemin{
 						dirProba[0] = (1-DEBUT_CH_DIR)/2;
 						dirProba[2] = (1-DEBUT_CH_DIR)/2;
 					}	
-				}else if(x<l-4){	//droite
+				}else if(x<l-5){	//droite
 					if(dir ==2){
 						dirProba[2] = dirProba[1]*ATTENUATION_LAT;
 						dirProba[0] = 0;
