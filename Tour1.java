@@ -23,7 +23,7 @@ public class Tour1 extends Tour{
 	public static final int RANGE = 250;
 
 	public Tour1(Rectangle fenetre, int x, int y){
-		super(nomImage, x, y, PRIX, 50, RANGE, 0, 10); //Tour fusil a pompe
+		super(nomImage, x, y, PRIX, 50, RANGE, 0, 10); //Tour fusil a pompe, FOCUS 10 ennemis max
 		rate = 70;
 	}
 
