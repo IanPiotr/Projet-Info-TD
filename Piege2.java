@@ -7,7 +7,7 @@ public class Piege2 extends Tour{
 	public static final int RANGE = 200;
 	
 	public Piege2(int x, int y){
-		super(nomImage, x, y, PRIX, 0, RANGE, 2, 10); //éventuellement presse à monnaie: pas de dégâts ni de ralentissement, mais tous les ennemis tués dans le champ d'action rapportent 2x plus
+		super(nomImage, x, y, PRIX, 0, RANGE, 2, 10); //presse à monnaie: pas de dégâts ni de ralentissement, mais tous les ennemis tués dans le champ d'action rapportent 2x plus
 		
 	}
 	
