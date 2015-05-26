@@ -204,19 +204,23 @@ public class Menu extends JLayeredPane {
 		return start;
 	}
 	
+	/* Met à jour le bouton niveau et la zone de texte */
 	public void MajMenu(int niv){
 		infoJeu.setText("Le niveau " + niv + " a commence !");
 		niveau.setText("Niveau : " + niv);
 	}
 	
+	/* Met à jour l'image du bouton start/pause */
 	public void MajVersPause(){ 
 		start.setIcon(iconPause);
 	}
 	
+	/* Met à jour l'image du bouton start/pause */
 	public void MajVersStart(){
 		start.setIcon(iconStart);
 	}
 	
+	/* Réinitialise les pièges et tours comme en début de partie */
 	public void reInit(){
 		for(int i = 1 ; i < 4 ; i++){
 			MesPieges[i].setEnabled(false);
@@ -256,6 +260,7 @@ public class Menu extends JLayeredPane {
 		scorePane.showMessageDialog(null, str, "Records des autres Strateges", -1, null);
 	}
 	
+	/* Rend disponible les boutons des tours et pièges selon le niveau */
 	public void updateBoutons(int level){
 		switch(level){
 			case 3 :
@@ -273,11 +278,11 @@ public class Menu extends JLayeredPane {
 		}
 	}
 	
+	/* Permet de mettre à jour une variable selon le bouton cliqué. Cette variable est utilisé ensuite dans la classe fenêtre pour poser les pièges et les tours */
 	public class BDefense implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			String nomButton = ((JButton)(e.getSource())).getText();
 			//Utilisation d'un setter pour mettre a jour le curseur en meme temps que variable
-			//Bugs sinon...
 			if(nomButton.equals("Tour 1")){
 				if(bizuth.argent >= Tour1.PRIX){
 					setVariable(1);
@@ -344,6 +349,7 @@ public class Menu extends JLayeredPane {
 		}
 	}
 	
+	/* Fenêtre de tuto en début de jeu (lorsqu'on choisi "Comment ?" en début de jeu) */
 	private class Tuto extends JDialog{
 		/* CONSTRUCTEUR */
 		public Tuto(JFrame parent, String title, boolean modal){
