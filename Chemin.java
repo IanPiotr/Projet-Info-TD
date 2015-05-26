@@ -181,7 +181,7 @@ public class Chemin{
 		int indice = 0;
 			
 		for(int i=1; i<tabCases.length-1; i++){			//parcours du tableau
-			for(int j=0; j<tabCases[0].length-1;j++){
+			for(int j=0; j<tabCases[0].length;j++){
 				if(!tabCases[i][j].isChemin()){
 					somme = 0;
 					indice = 0;
