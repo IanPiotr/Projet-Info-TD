@@ -41,6 +41,7 @@ public class Niveau{
 			}
 	}
 	
+	/* METHODE GENERATION ENNEMIS */
 	public Ennemis genererEnnemi(int numSpawn, Rectangle ecran){
 		switch(matriceC[0][numSpawn]){
 			case 1 :
@@ -89,6 +90,7 @@ public class Niveau{
 		} else return 3;
 	}
 	
+	/* POUR GENERER LA VIE DES ENNEMIS */
 	private int genererVie2(int level, int numSpawn){
 		int vie = 0;
 		int probaMax = 0;

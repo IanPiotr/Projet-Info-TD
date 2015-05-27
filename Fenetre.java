@@ -125,6 +125,7 @@ public class Fenetre extends JFrame{
 			System.out.println("background non trouvé"); 
         }
 
+		/* AJOUT DES ECOUTEURS */
         this.addMouseListener(new EcouteurClicSouris());
         this.addMouseMotionListener(new EcouteurMoveSouris());
         
@@ -137,7 +138,7 @@ public class Fenetre extends JFrame{
 	 * Trois methodes de debugages disponibles :
 	 * showBordures(gb)				pour visualiser les bordures du chemin
 	 * showContoursEnnemi(gb, bob)	pour visualiser les zones de contact entre ennemis
-	 * showPorteeTour(gb, eiffel)	pour visualiser la portee des tours
+	 * showPorteeTour(gb, eiffel)	pour visualiser la portee des tours ; desormais plus classee en tant que debugage
 	 */
 	public void paint(Graphics g) {
 		Graphics gb = monBuf.getGraphics();
@@ -197,7 +198,7 @@ public class Fenetre extends JFrame{
     /* CALCULS DEPLACEMENTS ENNEMIS */
     public class letsDance implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			boucle();
+			moteur();
 		}
 	}
 	
@@ -230,15 +231,17 @@ public class Fenetre extends JFrame{
 		}
 	}
 	
-	private void boucle() {
+	private void moteur() {
+		//Incrementation du temps
 		cadence++;
 		Ennemis cur = listeEnnemis.root;
+		//Deplacement des ennemis au sein du chemin
 		while(cur != null){
 			cur.moveChemin(tabCases, chemin.bordureGauche, chemin.bordureDroite, chemin.bordureHaut, chemin.bordureBas);
 			cur = cur.next;
 		}
 		
-		/* GESTION BOUSCULADE - ESSAI CHEMIN
+		/* GESTION BOUSCULADE
 		 * Essayons de se faire rentrer dedans les differents ennemis
 		 * La tete de liste (=listeEnnemis.root = racine) contient le plus vieil ennemi,
 		 * c'est a dire celui qui a spawn il y a le plus de temps,
@@ -246,8 +249,6 @@ public class Fenetre extends JFrame{
 		 * La priorite lui est donnee :
 		 * il doit TOUJOURS se debloquer. Les autres attendent que se soit fait
 		 * Pas de problemes avec la multi attente ; phenome de queue-leu-leu
-		 * NB : fonctionne desormais a priori correctement, pour un timer de spawn de 500ms
-		 * 		De plus gros bugs pour un timer inferieur, mais d'une autre nature que les initiaux
 		 */
 		Ennemis prev = listeEnnemis.root;
 		if(prev != null){
@@ -286,9 +287,9 @@ public class Fenetre extends JFrame{
 				cur = prev.next;
 			}
 		}
-		/* FIN DE L'ESSAI */
+		//*//
 		
-		/* GESTION TIR - ESSAI AVEC FOCUS
+		/* GESTION TIR
 		 * Essayons de faire perdre de la vie aux ennemis ou de les ralentir
 		 * lorsqu'ils passent a proximite d'une tour
 		 * C'est a dire lorsqu'ils sont dans le cercle portee des tours
@@ -308,13 +309,18 @@ public class Fenetre extends JFrame{
 			curT = curT.next;
 		}
 				
-		/* FIN DE L'ESSAI */
+		//*//
+		//On met a jour le dessin une fois que tous les calculs ont ete faits
 		repaint();
 	}
 	
+	/* FENETRE PERSONNALISEE
+	 * Pour demander son nom au joueur
+	 * lorsqu'il realise un nouveau record
+	 */
 	private class TonNom extends JDialog {
-		private boolean sendData = false;
-		private JTextField nom;
+		private boolean sendData = false;	//Pour savoir quand on a clique sur OK et recuperer le donnees du champs de texte
+		private JTextField nom;				//Champs de texte ou le joueur rentre son nom
 		TonNom(JFrame parent, String title, boolean modal, String text){
 			super(parent, title, modal);
 			setResizable(false);
@@ -363,6 +369,7 @@ public class Fenetre extends JFrame{
 		}
 	}
 	
+	/* POUR ECRIRE LES NOUVEAUX RECORDS */
 	private void ecrireScore(int score){
 		//Variables lecture fichier scores
 		FileReader lecteur = null;
@@ -474,6 +481,7 @@ public class Fenetre extends JFrame{
 			}
 		}
 		
+		//Suivant l'option qu'a choisie le joueur
 		switch(rang){
 			case 0 :
 				System.out.println("Tu as choisi de recommencer");
@@ -492,6 +500,7 @@ public class Fenetre extends JFrame{
 			
 	}
 	
+	/* POUR RECOMMENCER LE JEU */
 	public void recommencer(){
 		/* INIT JOUEUR */
         bizuth = new Joueur("Bizuth1");
@@ -544,6 +553,7 @@ public class Fenetre extends JFrame{
 		repaint();
 	}
 	
+	/* CLASSE INTERNE D'ECOUTE DES MOUVEMENTS SOURIS */
 	private class EcouteurMoveSouris extends MouseMotionAdapter {
 		
 		public void mouseMoved(MouseEvent e){
@@ -553,6 +563,7 @@ public class Fenetre extends JFrame{
 				int j = (int)((e.getY()-DECY)/Case.LCASE);	//-31 pour contrer le decalage du buffer
 				x = i*Case.LCASE + Case.LCASE/2;	//On visualise au centre de la case
 				y = j*Case.LCASE + Case.LCASE/2;
+				//Pour previsualiser les portees des tours
 				switch(menuTest.getVariable()){
 					case 1 :
 						portee = Tour1.RANGE;
@@ -589,6 +600,7 @@ public class Fenetre extends JFrame{
 		}
 	}
 	
+	/* CLASSE INTERNE D'ECOUTE DES CLICS SOURIS */
 	private class EcouteurClicSouris implements MouseListener {
 		//BUTTON1 = clic gauche
 		//BUTTON2 = clic molette
@@ -770,6 +782,7 @@ public class Fenetre extends JFrame{
 		
 	}
 	
+	/* CLASSE INTERNE D'ECOUTE POUR LANCER LES NIVEAUX OU LES ARRETER*/
 	public class EcouteurBoutonStart implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			if(((JButton)(e.getSource())).getText().equals(" ") && !enCours){
@@ -786,6 +799,7 @@ public class Fenetre extends JFrame{
 		}
 	}
 	
+	/* CLASSE INTERNE D'ECOUTE DESENNEMIS */
 	private class EcouteurEnnemi implements EnnemiListener {
 		
 		public void ennemiMort(EnnemiEvent e){
