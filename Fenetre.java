@@ -33,8 +33,8 @@ public class Fenetre extends JFrame{
 	//Decalage buffer suivant l'OS
 	// 8 , 31 sous Windows
 	// 0 , 39 sous Linux
-	private static final int DECX = 8;
-	private static final int DECY = 31;
+	private static final int DECX = 0;
+	private static final int DECY = 39;
 
 	
 	private Rectangle ecran;		//Rectangle limite de l'ecran
