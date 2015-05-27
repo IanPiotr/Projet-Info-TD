@@ -68,7 +68,7 @@ public class Menu extends JLayeredPane {
 		/* Fenêtre de début du jeu */
 		String[] intro = {"Oui !", "Non.", "Comment ?", "Voir les autres strateges"};
 		debutJeu = new JOptionPane();
-		int rang = debutJeu.showOptionDialog(null, new JLabel("<html><body><div align='center'>Bonjour a toi etranger !<br/>Des ordes d'ennemis deferlent sur nos campements,<br/>mais tout nos autres strateges sont sur d'autres fronts !<br/>Veux-tu nous aider a combattre ces monstres ?</div></body></html>", JLabel.CENTER), "Tower Defense !", JOptionPane.YES_NO_CANCEL_OPTION, -1, null, intro, intro[1]);
+		int rang = debutJeu.showOptionDialog(null, new JLabel("<html><body><div align='center'>Bonjour a toi etranger !<br/>Des hordes d'ennemis deferlent sur nos campements,<br/>mais tout nos autres strateges sont sur d'autres fronts !<br/>Veux-tu nous aider a combattre ces monstres ?</div></body></html>", JLabel.CENTER), "Tower Defense !", JOptionPane.YES_NO_CANCEL_OPTION, -1, null, intro, intro[1]);
 		switch(rang){
 			case 0 :
 				break;
