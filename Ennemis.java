@@ -14,23 +14,22 @@ import java.awt.Color;
 
 public abstract class Ennemis extends Element{
 
-	public int IDEnnemi;
-	protected int vie;
-	protected int vitesse;
-	public int dposx;
-	public int dposy;
-	protected Arc2D.Double cercle;
-	protected Rectangle limEcran;
-	private final EventListenerList listeners = new EventListenerList();
-	public Ennemis next;
-	protected boolean enBas;
-	protected int buteeBas;
-	protected int recompense;
-	protected boolean estRalenti;
-	private boolean beni;
-	public String nomImage;
-	public String nomImageReverse;
+	public int IDEnnemi;		//Identifiant unique propre a chaque ennemi
+	protected int vie;			//Vie de l'ennemi
+	protected int vitesse;		//Vitesse de l'ennemi
+	public int dposx;			//Deplacement selon x
+	public int dposy;			//Deplacement selon y
+	protected int recompense;	//Gain lorsque tue par le joueur
+	protected int buteeBas;		//Position la plus basse en y atteinte
+	protected boolean enBas;	//Pour lancer ou non la verification de la position du chemin
+	protected boolean estRalenti;	//Pour que les autres pieges sachent que cet ennemi a deja ete ralenti
+	private boolean beni;			//Pour que les autres pieges sachent que cet ennemi peut deja rapporter plus d'argent
+	protected Arc2D.Double cercle;	//Ellipse englobante
+	protected Rectangle limEcran;	//Rectangle definissant les limites de l'ecran
+	public Ennemis next;	//Pour insertion dans une liste personnalisee
+	private final EventListenerList listeners = new EventListenerList();	//Pour gerer les ecouteurs d'ennemis
 	
+	/* CONSTRUCTEUR PAR DEFAUT */
 	public Ennemis(){
 		super();
 		next = null;
